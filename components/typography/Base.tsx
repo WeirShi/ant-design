@@ -37,6 +37,8 @@ interface EditConfig {
   tooltip?: boolean | React.ReactNode;
   onStart?: () => void;
   onChange?: (value: string) => void;
+  onCancel?: () => void;
+  onEnd?: () => void;
   maxLength?: number;
   autoSize?: boolean | AutoSizeType;
 }
@@ -65,10 +67,11 @@ export interface BlockProps extends TypographyProps {
   delete?: boolean;
   strong?: boolean;
   keyboard?: boolean;
+  italic?: boolean;
 }
 
 function wrapperDecorations(
-  { mark, code, underline, delete: del, strong, keyboard }: BlockProps,
+  { mark, code, underline, delete: del, strong, keyboard, italic }: BlockProps,
   content: React.ReactNode,
 ) {
   let currentContent = content;
@@ -85,6 +88,7 @@ function wrapperDecorations(
   wrap(code, 'code');
   wrap(mark, 'mark');
   wrap(keyboard, 'kbd');
+  wrap(italic, 'i');
 
   return currentContent;
 }
@@ -193,7 +197,8 @@ class Base extends React.Component<InternalBlockProps, BaseState> {
   };
 
   // ================ Edit ================
-  onEditClick = () => {
+  onEditClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
     this.triggerEdit(true);
   };
 
@@ -204,6 +209,7 @@ class Base extends React.Component<InternalBlockProps, BaseState> {
   };
 
   onEditCancel = () => {
+    this.getEditable().onCancel?.();
     this.triggerEdit(false);
   };
 
@@ -410,12 +416,13 @@ class Base extends React.Component<InternalBlockProps, BaseState> {
   renderEditInput() {
     const { children, className, style } = this.props;
     const { direction } = this.context;
-    const { maxLength, autoSize } = this.getEditable();
+    const { maxLength, autoSize, onEnd } = this.getEditable();
     return (
       <Editable
         value={typeof children === 'string' ? children : ''}
         onSave={this.onEditChange}
         onCancel={this.onEditCancel}
+        onEnd={onEnd}
         prefixCls={this.getPrefixCls()}
         className={className}
         style={style}
@@ -469,7 +476,7 @@ class Base extends React.Component<InternalBlockProps, BaseState> {
       }
 
       // show rest content as title on symbol
-      restContent = restContent?.slice(String(ellipsisContent || '').length);
+      restContent = restContent.slice(String(ellipsisContent || '').length);
 
       // We move full content to outer element to avoid repeat read the content by accessibility
       textNode = (
@@ -510,13 +517,14 @@ class Base extends React.Component<InternalBlockProps, BaseState> {
           this.expandStr = expand;
 
           return (
-            <ResizeObserver onResize={this.resizeOnNextFrame} disabled={!rows}>
+            <ResizeObserver onResize={this.resizeOnNextFrame} disabled={cssEllipsis}>
               <Typography
                 className={classNames(
                   {
                     [`${prefixCls}-${type}`]: type,
                     [`${prefixCls}-disabled`]: disabled,
                     [`${prefixCls}-ellipsis`]: rows,
+                    [`${prefixCls}-single-line`]: rows === 1,
                     [`${prefixCls}-ellipsis-single-line`]: cssTextOverflow,
                     [`${prefixCls}-ellipsis-multiple-line`]: cssLineClamp,
                   },

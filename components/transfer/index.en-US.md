@@ -77,4 +77,4 @@ return <Transfer rowKey={record => record.uid} />;
 
 ### How to support fetch and present data from a remote server in Transfer column.
 
-In order to keep the page number synchronized, you can disable columns you checked without removing the option: <https://codesandbox.io/s/93xeb>
+In order to keep the page number synchronized, you can disable columns you checked without removing the option: <https://codesandbox.io/s/objective-wing-6iqbx>

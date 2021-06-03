@@ -24,7 +24,7 @@ interface DataNode {
   children?: DataNode[];
 }
 
-const initTreeDate: DataNode[] = [
+const initTreeData: DataNode[] = [
   { title: 'Expand to load', key: '0' },
   { title: 'Expand to load', key: '1' },
   { title: 'Tree Node', key: '2', isLeaf: true },
@@ -38,7 +38,8 @@ function updateTreeData(list: DataNode[], key: React.Key, children: DataNode[]):
         ...node,
         children,
       };
-    } else if (node.children) {
+    }
+    if (node.children) {
       return {
         ...node,
         children: updateTreeData(node.children, key, children),
@@ -49,7 +50,7 @@ function updateTreeData(list: DataNode[], key: React.Key, children: DataNode[]):
 }
 
 const Demo: React.FC<{}> = () => {
-  const [treeData, setTreeData] = useState(initTreeDate);
+  const [treeData, setTreeData] = useState(initTreeData);
 
   function onLoadData({ key, children }: any) {
     return new Promise<void>(resolve => {

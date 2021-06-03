@@ -1,8 +1,7 @@
 const path = require('path');
 const replaceLib = require('@ant-design/tools/lib/replaceLib');
 const getWebpackConfig = require('@ant-design/tools/lib/getWebpackConfig');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const { ESBuildPlugin, ESBuildMinifyPlugin } = require('esbuild-loader');
+const { ESBuildMinifyPlugin } = require('esbuild-loader');
 const { version } = require('../package.json');
 const themeConfig = require('./themeConfig');
 
@@ -76,15 +75,18 @@ module.exports = {
 
       // Resolve use react hook fail when yarn link or npm link
       // https://github.com/webpack/webpack/issues/8607#issuecomment-453068938
-      config.resolve.alias = { ...config.resolve.alias, react: require.resolve('react') };
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'react/jsx-runtime': require.resolve('react/jsx-runtime'),
+        react: require.resolve('react'),
+      };
     } else if (process.env.ESBUILD) {
       // use esbuild
-      config.plugins.push(new ESBuildPlugin());
       config.optimization.minimizer = [
         new ESBuildMinifyPlugin({
           target: 'es2015',
+          css: true,
         }),
-        new CssMinimizerPlugin(),
       ];
     }
 

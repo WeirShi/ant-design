@@ -26,7 +26,7 @@ const ValidateStatuses = tuple('success', 'warning', 'error', 'validating', '');
 export type ValidateStatus = typeof ValidateStatuses[number];
 
 type RenderChildren<Values = any> = (form: FormInstance<Values>) => React.ReactNode;
-type RcFieldProps = Omit<FieldProps, 'children'>;
+type RcFieldProps<Values = any> = Omit<FieldProps<Values>, 'children'>;
 type ChildrenType<Values = any> = RenderChildren<Values> | React.ReactNode;
 
 interface MemoInputProps {
@@ -43,7 +43,7 @@ const MemoInput = React.memo(
 export interface FormItemProps<Values = any>
   extends FormItemLabelProps,
     FormItemInputProps,
-    RcFieldProps {
+    RcFieldProps<Values> {
   prefixCls?: string;
   noStyle?: boolean;
   style?: React.CSSProperties;
@@ -128,10 +128,10 @@ function FormItem<Values = any>(props: FormItemProps<Values>): React.ReactElemen
   // Collect noStyle Field error to the top FormItem
   const updateChildItemErrors = noStyle
     ? updateItemErrors
-    : (subName: string, subErrors: string[], originSubName: string) => {
+    : (subName: string, subErrors: string[], originSubName?: string) => {
         setInlineErrors((prevInlineErrors = {}) => {
           // Clean up origin error when name changed
-          if (originSubName !== subName) {
+          if (originSubName && originSubName !== subName) {
             delete prevInlineErrors[originSubName];
           }
 
@@ -188,7 +188,7 @@ function FormItem<Values = any>(props: FormItemProps<Values>): React.ReactElemen
 
     const itemClassName = {
       [`${prefixCls}-item`]: true,
-      [`${prefixCls}-item-with-help`]: domErrorVisible || help,
+      [`${prefixCls}-item-with-help`]: domErrorVisible || !!help,
       [`${className}`]: !!className,
 
       // Status

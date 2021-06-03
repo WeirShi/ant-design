@@ -30,8 +30,10 @@ describe('Typography', () => {
   const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
   // Mock offsetHeight
-  const originOffsetHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight')
-    .get;
+  const originOffsetHeight = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'offsetHeight',
+  ).get;
   Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
     get() {
       let html = this.innerHTML;
@@ -333,6 +335,7 @@ describe('Typography', () => {
           }
 
           jest.useFakeTimers();
+          wrapper.find('.ant-typography-copy').first().simulate('click');
           jest.runAllTimers();
           wrapper.update();
 
@@ -468,6 +471,24 @@ describe('Typography', () => {
       testStep({ name: 'customize edit show tooltip', tooltip: true });
       testStep({ name: 'customize edit hide tooltip', tooltip: false });
       testStep({ name: 'customize edit tooltip text', tooltip: 'click to edit text' });
+
+      it('should trigger onEnd when type Enter', () => {
+        const onEnd = jest.fn();
+        const wrapper = mount(<Paragraph editable={{ onEnd }}>Bamboo</Paragraph>);
+        wrapper.find('.ant-typography-edit').first().simulate('click');
+        wrapper.find('textarea').simulate('keyDown', { keyCode: KeyCode.ENTER });
+        wrapper.find('textarea').simulate('keyUp', { keyCode: KeyCode.ENTER });
+        expect(onEnd).toHaveBeenCalledTimes(1);
+      });
+
+      it('should trigger onCancel when type ESC', () => {
+        const onCancel = jest.fn();
+        const wrapper = mount(<Paragraph editable={{ onCancel }}>Bamboo</Paragraph>);
+        wrapper.find('.ant-typography-edit').first().simulate('click');
+        wrapper.find('textarea').simulate('keyDown', { keyCode: KeyCode.ESC });
+        wrapper.find('textarea').simulate('keyUp', { keyCode: KeyCode.ESC });
+        expect(onCancel).toHaveBeenCalledTimes(1);
+      });
 
       it('should only trigger focus on the first time', () => {
         let triggerTimes = 0;

@@ -189,7 +189,7 @@ const Badge: CompoundedComponent = ({
             [`${prefixCls}-count`]: !isDot,
             [`${prefixCls}-count-sm`]: size === 'small',
             [`${prefixCls}-multiple-words`]:
-              !isDot && displayCount && displayCount?.toString().length > 1,
+              !isDot && displayCount && displayCount.toString().length > 1,
             [`${prefixCls}-status-${status}`]: !!status,
             [`${prefixCls}-status-${color}`]: isPresetColor(color),
           });

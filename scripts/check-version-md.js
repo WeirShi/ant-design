@@ -1,3 +1,4 @@
+/* eslint no-console: 0 */
 const chalk = require('chalk');
 const fs = require('fs');
 const { join } = require('path');
@@ -29,6 +30,13 @@ const getChangelogByVersion = (content, version) => {
 const packageJson = require(join(__dirname, '..', 'package.json'));
 
 const { version } = packageJson;
+
+if (!/^\d+\.\d+\.\d+$/.test(version)) {
+  console.log('\n');
+  console.log(chalk.blue('[check-version-md]: Prerelease Version. Skipped.'));
+  console.log('\n');
+  process.exit(0);
+}
 
 const changeLogContent = fs.readFileSync(join(__dirname, '..', 'CHANGELOG.en-US.md')).toString();
 

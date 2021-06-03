@@ -21,7 +21,6 @@ const dimensionMaxMap = {
 
 export interface SiderContextProps {
   siderCollapsed?: boolean;
-  collapsedWidth?: number | string;
 }
 
 export const SiderContext: React.Context<SiderContextProps> = React.createContext({});
@@ -120,7 +119,7 @@ const Sider = React.forwardRef<HTMLDivElement, SiderProps>(
       let mql: MediaQueryList;
       if (typeof window !== 'undefined') {
         const { matchMedia } = window;
-        if (matchMedia && breakpoint && breakpoint in dimensionMaxMap) {
+        if (matchMedia! && breakpoint && breakpoint in dimensionMaxMap) {
           mql = matchMedia(`(max-width: ${dimensionMaxMap[breakpoint]})`);
           try {
             mql.addEventListener('change', responsiveHandler);
@@ -219,7 +218,6 @@ const Sider = React.forwardRef<HTMLDivElement, SiderProps>(
       <SiderContext.Provider
         value={{
           siderCollapsed: collapsed,
-          collapsedWidth,
         }}
       >
         {renderSider()}

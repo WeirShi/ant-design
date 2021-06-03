@@ -84,7 +84,7 @@ interface ProviderChildrenProps extends ConfigProviderProps {
 }
 
 export const defaultPrefixCls = 'ant';
-let globalPrefixCls = defaultPrefixCls;
+let globalPrefixCls: string;
 
 const setGlobalConfig = (params: Pick<ConfigProviderProps, 'prefixCls'>) => {
   if (params.prefixCls !== undefined) {
@@ -92,10 +92,33 @@ const setGlobalConfig = (params: Pick<ConfigProviderProps, 'prefixCls'>) => {
   }
 };
 
+function getGlobalPrefixCls() {
+  return globalPrefixCls || defaultPrefixCls;
+}
+
 export const globalConfig = () => ({
   getPrefixCls: (suffixCls?: string, customizePrefixCls?: string) => {
     if (customizePrefixCls) return customizePrefixCls;
-    return suffixCls ? `${globalPrefixCls}-${suffixCls}` : globalPrefixCls;
+    return suffixCls ? `${getGlobalPrefixCls()}-${suffixCls}` : getGlobalPrefixCls();
+  },
+  getRootPrefixCls: (rootPrefixCls?: string, customizePrefixCls?: string) => {
+    // Customize rootPrefixCls is first priority
+    if (rootPrefixCls) {
+      return rootPrefixCls;
+    }
+
+    // If Global prefixCls provided, use this
+    if (globalPrefixCls) {
+      return globalPrefixCls;
+    }
+
+    // [Legacy] If customize prefixCls provided, we cut it to get the prefixCls
+    if (customizePrefixCls && customizePrefixCls.includes('-')) {
+      return customizePrefixCls.replace(/^(.*)-[^-]*$/, '$1');
+    }
+
+    // Fallback to default prefixCls
+    return getGlobalPrefixCls();
   },
 });
 
@@ -126,7 +149,7 @@ const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
 
       return suffixCls ? `${mergedPrefixCls}-${suffixCls}` : mergedPrefixCls;
     },
-    [parentContext.getPrefixCls],
+    [parentContext.getPrefixCls, props.prefixCls],
   );
 
   const config = {
@@ -164,7 +187,9 @@ const ProviderChildren: React.FC<ProviderChildrenProps> = props => {
     },
   );
 
-  const memoIconContextValue = React.useMemo(() => ({ prefixCls: iconPrefixCls }), [iconPrefixCls]);
+  const memoIconContextValue = React.useMemo(() => ({ prefixCls: iconPrefixCls, csp }), [
+    iconPrefixCls,
+  ]);
 
   let childNode = children;
   // Additional Form provider
@@ -235,7 +260,7 @@ const ConfigProvider: React.FC<ConfigProviderProps> & {
   );
 };
 
-/** @private internal usage. do not use in your production */
+/** @private internal Usage. do not use in your production */
 ConfigProvider.ConfigContext = ConfigContext;
 ConfigProvider.SizeContext = SizeContext;
 ConfigProvider.config = setGlobalConfig;

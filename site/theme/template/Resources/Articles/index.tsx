@@ -2,7 +2,7 @@
 import * as React from 'react';
 import moment from 'moment';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Tabs, Skeleton, Avatar, Divider } from 'antd';
+import { Tabs, Skeleton, Avatar, Divider, Empty } from 'antd';
 import { useSiteData } from '../../Home/util';
 import './index.less';
 
@@ -26,9 +26,7 @@ interface Articles {
   en: Article[];
 }
 
-interface Authors {
-  [name: string]: Author;
-}
+type Authors = Author[];
 
 interface ArticleListProps {
   name: React.ReactNode;
@@ -36,24 +34,28 @@ interface ArticleListProps {
   authors: Authors;
 }
 
-const ArticleList: React.FC<ArticleListProps> = ({ name, data, authors = {} }) => (
+const ArticleList: React.FC<ArticleListProps> = ({ name, data = [], authors = [] }) => (
   <td>
     <h4>{name}</h4>
     <ul className="article-list">
-      {data.map((article, index) => {
-        const author = authors[article.author] || {};
-        return (
-          <li key={index}>
-            <a href={author.href} target="_blank" rel="noreferrer">
-              <Avatar size="small" src={author.avatar} />
-            </a>
-            <Divider type="vertical" />
-            <a href={article.href} target="_blank" rel="noreferrer">
-              {article.title}
-            </a>
-          </li>
-        );
-      })}
+      {data.length === 0 ? (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+      ) : (
+        data.map((article, index) => {
+          const author = authors.find(auth => auth.name === article.author);
+          return (
+            <li key={index}>
+              <a href={author?.href} target="_blank" rel="noreferrer">
+                <Avatar size="small" src={author?.avatar} />
+              </a>
+              <Divider type="vertical" />
+              <a href={article.href} target="_blank" rel="noreferrer">
+                {article.title}
+              </a>
+            </li>
+          );
+        })
+      )}
     </ul>
   </td>
 );
@@ -61,7 +63,7 @@ const ArticleList: React.FC<ArticleListProps> = ({ name, data, authors = {} }) =
 export default () => {
   const { locale } = useIntl();
   const isZhCN = locale === 'zh-CN';
-  const [{ articles = { cn: [], en: [] }, authors = {} }, loading] =
+  const [{ articles = { cn: [], en: [] }, authors = [] }, loading] =
     useSiteData<{ articles: Articles; authors: Authors }>();
 
   // ========================== Data ==========================

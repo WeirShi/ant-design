@@ -1,10 +1,12 @@
-import * as React from 'react';
 import toArray from 'rc-util/lib/Children/toArray';
+import useIsomorphicLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import * as React from 'react';
 
 export interface EllipsisProps {
   enabledMeasure?: boolean;
   text?: React.ReactNode;
   width: number;
+  fontSize: number;
   rows: number;
   children: (cutChildren: React.ReactNode[], needEllipsis: boolean) => React.ReactNode;
   onEllipsis: (isEllipsis: boolean) => void;
@@ -65,21 +67,31 @@ const WALKING = 2;
 const DONE_WITH_ELLIPSIS = 3;
 const DONE_WITHOUT_ELLIPSIS = 4;
 
-const Ellipsis = ({ enabledMeasure, children, text, width, rows, onEllipsis }: EllipsisProps) => {
-  const [cutLength, setCutLength] = React.useState<[number, number, number]>([0, 0, 0]);
-  const [walkingState, setWalkingState] = React.useState<
-    | typeof NONE
-    | typeof PREPARE
-    | typeof WALKING
-    | typeof DONE_WITH_ELLIPSIS
-    | typeof DONE_WITHOUT_ELLIPSIS
-  >(NONE);
-  const [startLen, midLen, endLen] = cutLength;
+type WalkingState =
+  | typeof NONE
+  | typeof PREPARE
+  | typeof WALKING
+  | typeof DONE_WITH_ELLIPSIS
+  | typeof DONE_WITHOUT_ELLIPSIS;
+
+const Ellipsis = ({
+  enabledMeasure,
+  children,
+  text,
+  width,
+  fontSize,
+  rows,
+  onEllipsis,
+}: EllipsisProps) => {
+  const [[startLen, midLen, endLen], setCutLength] = React.useState<
+    [startLen: number, midLen: number, endLen: number]
+  >([0, 0, 0]);
+  const [walkingState, setWalkingState] = React.useState<WalkingState>(NONE);
 
   const [singleRowHeight, setSingleRowHeight] = React.useState(0);
 
-  const singleRowRef = React.useRef<HTMLSpanElement>(null);
-  const midRowRef = React.useRef<HTMLSpanElement>(null);
+  const singleRowRef = React.useRef<HTMLElement>(null);
+  const midRowRef = React.useRef<HTMLElement>(null);
 
   const nodeList = React.useMemo(() => toArray(text), [text]);
   const totalLen = React.useMemo(() => getNodesLen(nodeList), [nodeList]);
@@ -93,20 +105,20 @@ const Ellipsis = ({ enabledMeasure, children, text, width, rows, onEllipsis }: E
   }, [enabledMeasure, walkingState, children, nodeList, midLen, totalLen]);
 
   // ======================== Walk ========================
-  React.useLayoutEffect(() => {
-    if (enabledMeasure && width && totalLen) {
+  useIsomorphicLayoutEffect(() => {
+    if (enabledMeasure && width && fontSize && totalLen) {
       setWalkingState(PREPARE);
       setCutLength([0, Math.ceil(totalLen / 2), totalLen]);
     }
-  }, [enabledMeasure, width, text, totalLen, rows]);
+  }, [enabledMeasure, width, fontSize, text, totalLen, rows]);
 
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (walkingState === PREPARE) {
       setSingleRowHeight(singleRowRef.current?.offsetHeight || 0);
     }
   }, [walkingState]);
 
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (singleRowHeight) {
       if (walkingState === PREPARE) {
         // Ignore if position is enough
@@ -157,7 +169,7 @@ const Ellipsis = ({ enabledMeasure, children, text, width, rows, onEllipsis }: E
 
   const renderMeasure = (
     content: React.ReactNode,
-    ref: React.Ref<HTMLSpanElement>,
+    ref: React.Ref<HTMLElement>,
     style: React.CSSProperties,
   ) => (
     <span
@@ -171,6 +183,7 @@ const Ellipsis = ({ enabledMeasure, children, text, width, rows, onEllipsis }: E
         zIndex: -9999,
         visibility: 'hidden',
         pointerEvents: 'none',
+        fontSize: Math.floor(fontSize / 2) * 2,
         ...style,
       }}
     >
@@ -178,7 +191,7 @@ const Ellipsis = ({ enabledMeasure, children, text, width, rows, onEllipsis }: E
     </span>
   );
 
-  const renderMeasureSlice = (len: number, ref: React.Ref<HTMLSpanElement>) => {
+  const renderMeasureSlice = (len: number, ref: React.Ref<HTMLElement>) => {
     const sliceNodeList = sliceNodes(nodeList, len);
 
     return renderMeasure(children(sliceNodeList, true), ref, measureStyle);
@@ -193,7 +206,7 @@ const Ellipsis = ({ enabledMeasure, children, text, width, rows, onEllipsis }: E
         walkingState !== DONE_WITHOUT_ELLIPSIS && (
           <>
             {/* `l` for top & `g` for bottom measure */}
-            {renderMeasure('lg', singleRowRef, { width: 9999 })}
+            {renderMeasure('lg', singleRowRef, { wordBreak: 'keep-all', whiteSpace: 'nowrap' })}
             {/* {renderMeasureSlice(midLen, midRowRef)} */}
             {walkingState === PREPARE
               ? renderMeasure(children(nodeList, false), midRowRef, measureStyle)

@@ -1,17 +1,19 @@
+import useState from 'rc-util/lib/hooks/useState';
 import * as React from 'react';
 import Button from '../button';
-import { LegacyButtonType, ButtonProps, convertLegacyProps } from '../button/button';
-import useDestroyed from './hooks/useDestroyed';
+import type { ButtonProps, LegacyButtonType } from '../button/button';
+import { convertLegacyProps } from '../button/button';
 
 export interface ActionButtonProps {
   type?: LegacyButtonType;
   actionFn?: (...args: any[]) => any | PromiseLike<any>;
-  close: Function;
+  close?: Function;
   autoFocus?: boolean;
   prefixCls: string;
   buttonProps?: ButtonProps;
   emitEvent?: boolean;
   quitOnNullishReturnValue?: boolean;
+  children?: React.ReactNode;
 }
 
 function isThenable(thing?: PromiseLike<any>): boolean {
@@ -20,15 +22,19 @@ function isThenable(thing?: PromiseLike<any>): boolean {
 
 const ActionButton: React.FC<ActionButtonProps> = props => {
   const clickedRef = React.useRef<boolean>(false);
-  const ref = React.useRef<any>();
-  const isDestroyed = useDestroyed();
-  const [loading, setLoading] = React.useState<ButtonProps['loading']>(false);
+  const ref = React.useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState<ButtonProps['loading']>(false);
+  const { close } = props;
+  const onInternalClose = (...args: any[]) => {
+    close?.(...args);
+  };
 
   React.useEffect(() => {
-    let timeoutId: any;
+    let timeoutId: NodeJS.Timer | null = null;
     if (props.autoFocus) {
-      const $this = ref.current as HTMLInputElement;
-      timeoutId = setTimeout(() => $this.focus());
+      timeoutId = setTimeout(() => {
+        ref.current?.focus();
+      });
     }
     return () => {
       if (timeoutId) {
@@ -38,17 +44,14 @@ const ActionButton: React.FC<ActionButtonProps> = props => {
   }, []);
 
   const handlePromiseOnOk = (returnValueOfOnOk?: PromiseLike<any>) => {
-    const { close } = props;
     if (!isThenable(returnValueOfOnOk)) {
       return;
     }
     setLoading(true);
     returnValueOfOnOk!.then(
       (...args: any[]) => {
-        if (!isDestroyed()) {
-          setLoading(false);
-        }
-        close(...args);
+        setLoading(false, true);
+        onInternalClose(...args);
         clickedRef.current = false;
       },
       (e: Error) => {
@@ -56,22 +59,20 @@ const ActionButton: React.FC<ActionButtonProps> = props => {
         // eslint-disable-next-line no-console
         console.error(e);
         // See: https://github.com/ant-design/ant-design/issues/6183
-        if (!isDestroyed()) {
-          setLoading(false);
-        }
+        setLoading(false, true);
         clickedRef.current = false;
       },
     );
   };
 
   const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const { actionFn, close } = props;
+    const { actionFn } = props;
     if (clickedRef.current) {
       return;
     }
     clickedRef.current = true;
     if (!actionFn) {
-      close();
+      onInternalClose();
       return;
     }
     let returnValueOfOnOk;
@@ -79,7 +80,7 @@ const ActionButton: React.FC<ActionButtonProps> = props => {
       returnValueOfOnOk = actionFn(e);
       if (props.quitOnNullishReturnValue && !isThenable(returnValueOfOnOk)) {
         clickedRef.current = false;
-        close(e);
+        onInternalClose(e);
         return;
       }
     } else if (actionFn.length) {
@@ -89,7 +90,7 @@ const ActionButton: React.FC<ActionButtonProps> = props => {
     } else {
       returnValueOfOnOk = actionFn();
       if (!returnValueOfOnOk) {
-        close();
+        onInternalClose();
         return;
       }
     }

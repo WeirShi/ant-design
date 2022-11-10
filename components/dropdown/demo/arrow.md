@@ -13,53 +13,63 @@ title:
 
 You could display an arrow.
 
-```jsx
-import { Menu, Dropdown, Button } from 'antd';
+```tsx
+import type { MenuProps } from 'antd';
+import { Button, Dropdown } from 'antd';
+import React from 'react';
 
-const menu = (
-  <Menu>
-    <Menu.Item>
+const items: MenuProps['items'] = [
+  {
+    key: '1',
+    label: (
       <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
         1st menu item
       </a>
-    </Menu.Item>
-    <Menu.Item>
+    ),
+  },
+  {
+    key: '2',
+    label: (
       <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
         2nd menu item
       </a>
-    </Menu.Item>
-    <Menu.Item>
+    ),
+  },
+  {
+    key: '3',
+    label: (
       <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
         3rd menu item
       </a>
-    </Menu.Item>
-  </Menu>
-);
+    ),
+  },
+];
 
-ReactDOM.render(
+const App: React.FC = () => (
   <>
-    <Dropdown overlay={menu} placement="bottomLeft" arrow>
+    <Dropdown menu={{ items }} placement="bottomLeft" arrow>
       <Button>bottomLeft</Button>
     </Dropdown>
-    <Dropdown overlay={menu} placement="bottomCenter" arrow>
-      <Button>bottomCenter</Button>
+    <Dropdown menu={{ items }} placement="bottom" arrow>
+      <Button>bottom</Button>
     </Dropdown>
-    <Dropdown overlay={menu} placement="bottomRight" arrow>
+    <Dropdown menu={{ items }} placement="bottomRight" arrow>
       <Button>bottomRight</Button>
     </Dropdown>
     <br />
-    <Dropdown overlay={menu} placement="topLeft" arrow>
+    <Dropdown menu={{ items }} placement="topLeft" arrow>
       <Button>topLeft</Button>
     </Dropdown>
-    <Dropdown overlay={menu} placement="topCenter" arrow>
-      <Button>topCenter</Button>
+    <Dropdown menu={{ items }} placement="top" arrow>
+      <Button>top</Button>
     </Dropdown>
-    <Dropdown overlay={menu} placement="topRight" arrow>
+    <Dropdown menu={{ items }} placement="topRight" arrow>
       <Button>topRight</Button>
     </Dropdown>
-  </>,
-  mountNode,
+  </>
 );
+
+export default App;
 ```
 
 ```css

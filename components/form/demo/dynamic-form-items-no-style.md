@@ -14,17 +14,18 @@ debug: true
 
 Nest with `noStyle` field dynamic form.
 
-```jsx
-import { Form, Input, Button, Space } from 'antd';
+```tsx
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Space } from 'antd';
+import React from 'react';
 
-const Demo = () => {
-  const onFinish = values => {
+const App: React.FC = () => {
+  const onFinish = (values: any) => {
     console.log('Received values of form:', values);
   };
 
   return (
-    <Form name="dynamic_form_nest_item" onFinish={onFinish} autoComplete="off">
+    <Form name="dynamic_form_no_style" onFinish={onFinish} autoComplete="off">
       <Form.Item label="Users">
         <Form.List name="users">
           {(fields, { add, remove }) => (
@@ -62,5 +63,5 @@ const Demo = () => {
   );
 };
 
-ReactDOM.render(<Demo />, mountNode);
+export default App;
 ```

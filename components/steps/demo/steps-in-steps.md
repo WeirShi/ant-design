@@ -14,23 +14,36 @@ title:
 
 Test style of Steps inside Steps.
 
-```jsx
+```tsx
+import type { StepsProps } from 'antd';
+import { Card, Radio, Steps } from 'antd';
 import React, { useState } from 'react';
-import { Steps, Radio, Card } from 'antd';
 
-const { Step } = Steps;
-
-const App = () => {
-  const [size, setSize] = useState('default');
+const App: React.FC = () => {
+  const [size, setSize] = useState<StepsProps['size']>('default');
+  const description = 'This is a description.';
   const horizontalSteps = (
     <Card>
-      <Steps size={size}>
-        <Step title="Finished" description="This is a description." />
-        <Step title="In Progress" description="This is a description." />
-        <Step title="Waiting" description="This is a description." />
-      </Steps>
+      <Steps
+        size={size}
+        items={[
+          {
+            title: 'Finished',
+            description,
+          },
+          {
+            title: 'In Progress',
+            description,
+          },
+          {
+            title: 'Waiting',
+            description,
+          },
+        ]}
+      />
     </Card>
   );
+
   return (
     <>
       <Radio.Group
@@ -41,14 +54,27 @@ const App = () => {
         <Radio value="small">Small</Radio>
         <Radio value="default">Default</Radio>
       </Radio.Group>
-      <Steps size={size} direction="vertical">
-        <Step title="Finished" description={horizontalSteps} />
-        <Step title="In Progress" description="This is a description." />
-        <Step title="Waiting" description="This is a description." />
-      </Steps>
+      <Steps
+        size={size}
+        direction="vertical"
+        items={[
+          {
+            title: 'Finished',
+            description: horizontalSteps,
+          },
+          {
+            title: 'In Progress',
+            description,
+          },
+          {
+            title: 'Waiting',
+            description,
+          },
+        ]}
+      />
     </>
   );
 };
 
-ReactDOM.render(<App />, mountNode);
+export default App;
 ```

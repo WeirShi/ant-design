@@ -1,17 +1,16 @@
-import * as React from 'react';
-import {
-  GetRowKey,
+import type {
   ColumnType as RcColumnType,
-  RenderedCell as RcRenderedCell,
-  ExpandableConfig,
   FixedType,
+  RenderedCell as RcRenderedCell,
 } from 'rc-table/lib/interface';
-import { TooltipProps } from '../tooltip';
-import { CheckboxProps } from '../checkbox';
-import { PaginationProps } from '../pagination';
-import { Breakpoint } from '../_util/responsiveObserve';
-import { INTERNAL_SELECTION_ITEM } from './hooks/useSelection';
+import { ExpandableConfig, GetRowKey } from 'rc-table/lib/interface';
+import type * as React from 'react';
+import type { CheckboxProps } from '../checkbox';
+import type { PaginationProps } from '../pagination';
+import type { TooltipProps } from '../tooltip';
+import type { Breakpoint } from '../_util/responsiveObserve';
 import { tuple } from '../_util/type';
+import type { INTERNAL_SELECTION_ITEM } from './hooks/useSelection';
 // import { TableAction } from './Table';
 
 export { GetRowKey, ExpandableConfig };
@@ -64,7 +63,7 @@ export interface ColumnTitleProps<RecordType> {
   sortColumn?: ColumnType<RecordType>;
   sortColumns?: { column: ColumnType<RecordType>; order: SortOrder }[];
 
-  filters?: Record<string, string[]>;
+  filters?: Record<string, FilterValue>;
 }
 
 export type ColumnTitle<RecordType> =
@@ -73,6 +72,9 @@ export type ColumnTitle<RecordType> =
 
 export type FilterValue = (Key | boolean)[];
 export type FilterKey = Key[] | null;
+export type FilterSearchType<RecordType = Record<string, any>> =
+  | boolean
+  | ((input: string, record: RecordType) => boolean);
 export interface FilterConfirmProps {
   closeDropdown: boolean;
 }
@@ -81,13 +83,19 @@ export interface FilterDropdownProps {
   prefixCls: string;
   setSelectedKeys: (selectedKeys: React.Key[]) => void;
   selectedKeys: React.Key[];
+  /**
+   * Confirm filter value, if you want to close dropdown before commit, you can call with
+   * {closeDropdown: true}
+   */
   confirm: (param?: FilterConfirmProps) => void;
   clearFilters?: () => void;
   filters?: ColumnFilterItem[];
+  /** Only close filterDropdown */
+  close: () => void;
   visible: boolean;
 }
 
-export interface ColumnType<RecordType> extends RcColumnType<RecordType> {
+export interface ColumnType<RecordType> extends Omit<RcColumnType<RecordType>, 'title'> {
   title?: ColumnTitle<RecordType>;
   // Sorter
   sorter?:
@@ -112,10 +120,21 @@ export interface ColumnType<RecordType> extends RcColumnType<RecordType> {
   defaultFilteredValue?: FilterValue | null;
   filterIcon?: React.ReactNode | ((filtered: boolean) => React.ReactNode);
   filterMode?: 'menu' | 'tree';
-  filterSearch?: boolean;
+  filterSearch?: FilterSearchType<ColumnFilterItem>;
   onFilter?: (value: string | number | boolean, record: RecordType) => boolean;
+  /**
+   * @deprecated `filterDropdownVisible` is deprecated which will be removed in next major version.
+   *   Please use `filterDropdownOpen` instead.
+   */
   filterDropdownVisible?: boolean;
+  filterDropdownOpen?: boolean;
+  /**
+   * @deprecated `onFilterDropdownVisibleChange` is deprecated which will be removed in next major
+   *   version. Please use `onFilterDropdownOpenChange` instead.
+   */
   onFilterDropdownVisibleChange?: (visible: boolean) => void;
+  onFilterDropdownOpenChange?: (open: boolean) => void;
+  filterResetToDefaultFilteredValue?: boolean;
 
   // Responsive
   responsive?: Breakpoint[];
@@ -143,20 +162,24 @@ export type SelectionSelectFn<T> = (
   nativeEvent: Event,
 ) => void;
 
+export type RowSelectMethod = 'all' | 'none' | 'invert' | 'single' | 'multiple';
+
 export interface TableRowSelection<T> {
   /** Keep the selection keys in list even the key not exist in `dataSource` anymore */
   preserveSelectedRowKeys?: boolean;
   type?: RowSelectionType;
   selectedRowKeys?: Key[];
   defaultSelectedRowKeys?: Key[];
-  onChange?: (selectedRowKeys: Key[], selectedRows: T[]) => void;
+  onChange?: (selectedRowKeys: Key[], selectedRows: T[], info: { type: RowSelectMethod }) => void;
   getCheckboxProps?: (record: T) => Partial<Omit<CheckboxProps, 'checked' | 'defaultChecked'>>;
   onSelect?: SelectionSelectFn<T>;
+  /** @deprecated This function is deprecated and should use `onChange` instead */
   onSelectMultiple?: (selected: boolean, selectedRows: T[], changeRows: T[]) => void;
-  /** @deprecated This function is meaningless and should use `onChange` instead */
+  /** @deprecated This function is deprecated and should use `onChange` instead */
   onSelectAll?: (selected: boolean, selectedRows: T[], changeRows: T[]) => void;
-  /** @deprecated This function is meaningless and should use `onChange` instead */
+  /** @deprecated This function is deprecated and should use `onChange` instead */
   onSelectInvert?: (selectedRowKeys: Key[]) => void;
+  /** @deprecated This function is deprecated and should use `onChange` instead */
   onSelectNone?: () => void;
   selections?: INTERNAL_SELECTION_ITEM[] | boolean;
   hideSelectAll?: boolean;

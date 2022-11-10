@@ -32,7 +32,7 @@ cover: https://gw.alipayobjects.com/zos/alicdn/qtJm4yt45/AutoComplete.svg
 | defaultOpen | 是否默认展开下拉菜单 | boolean | - |  |
 | defaultValue | 指定默认选中的条目 | string | - |  |
 | disabled | 是否禁用 | boolean | false |  |
-| dropdownClassName | 下拉菜单的 className 属性 | string | - |  |
+| popupClassName | 下拉菜单的 className 属性 | string | - | 4.23.0 |
 | dropdownMatchSelectWidth | 下拉菜单和选择器同宽。默认将设置 `min-width`，当值小于选择框宽度时会被忽略。false 时会关闭虚拟滚动 | boolean \| number | true |  |
 | filterOption | 是否根据输入项进行筛选。当其为一个函数时，会接收 `inputValue` `option` 两个参数，当 `option` 符合筛选条件时，应返回 true，反之则返回 false | boolean \| function(inputValue, option) | true |  |
 | getPopupContainer | 菜单渲染父节点。默认渲染到 body 上，如果你遇到菜单滚动定位问题，试试修改为滚动的区域，并相对其定位。[示例](https://codesandbox.io/s/4j168r7jw0) | function(triggerNode) | () => document.body |  |
@@ -40,6 +40,7 @@ cover: https://gw.alipayobjects.com/zos/alicdn/qtJm4yt45/AutoComplete.svg
 | open | 是否展开下拉菜单 | boolean | - |  |
 | options | 数据化配置选项内容，相比 jsx 定义会获得更好的渲染性能 | { label, value }\[] | - |  |
 | placeholder | 输入框提示 | string | - |  |
+| status | 设置校验状态 | 'error' \| 'warning' | - | 4.19.0 |
 | value | 指定当前选中的条目 | string | - |  |
 | onBlur | 失去焦点时的回调 | function() | - |  |
 | onChange | 选中 option，或 input 的 value 变化时，调用此函数 | function(value) | - |  |
@@ -47,13 +48,14 @@ cover: https://gw.alipayobjects.com/zos/alicdn/qtJm4yt45/AutoComplete.svg
 | onFocus | 获得焦点时的回调 | function() | - |  |
 | onSearch | 搜索补全项的时候调用 | function(value) | - |  |
 | onSelect | 被选中时调用，参数为选中项的 value 值 | function(value, option) | - |  |
+| onClear | 清除内容时回调 | function | - | 4.6.0 |
 
 ## 方法
 
-| 名称 | 描述 | 版本 |
-| --- | --- | --- |
-| blur() | 移除焦点 |  |
-| focus() | 获取焦点 |  |
+| 名称    | 描述     | 版本 |
+| ------- | -------- | ---- |
+| blur()  | 移除焦点 |      |
+| focus() | 获取焦点 |      |
 
 ## FAQ
 

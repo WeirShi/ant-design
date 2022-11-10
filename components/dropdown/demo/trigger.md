@@ -1,5 +1,5 @@
 ---
-order: 3
+order: 5
 title:
   zh-CN: 触发方式
   en-US: Trigger mode
@@ -13,29 +13,40 @@ title:
 
 The default trigger mode is `hover`, you can change it to `click`.
 
-```jsx
-import { Menu, Dropdown } from 'antd';
+```tsx
 import { DownOutlined } from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Dropdown, Space } from 'antd';
+import React from 'react';
 
-const menu = (
-  <Menu>
-    <Menu.Item key="0">
-      <a href="https://www.antgroup.com">1st menu item</a>
-    </Menu.Item>
-    <Menu.Item key="1">
-      <a href="https://www.aliyun.com">2nd menu item</a>
-    </Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="3">3rd menu item</Menu.Item>
-  </Menu>
-);
+const items: MenuProps['items'] = [
+  {
+    label: <a href="https://www.antgroup.com">1st menu item</a>,
+    key: '0',
+  },
+  {
+    label: <a href="https://www.aliyun.com">2nd menu item</a>,
+    key: '1',
+  },
+  {
+    type: 'divider',
+  },
+  {
+    label: '3rd menu item',
+    key: '3',
+  },
+];
 
-ReactDOM.render(
-  <Dropdown overlay={menu} trigger={['click']}>
-    <a className="ant-dropdown-link" onClick={e => e.preventDefault()}>
-      Click me <DownOutlined />
+const App: React.FC = () => (
+  <Dropdown menu={{ items }} trigger={['click']}>
+    <a onClick={e => e.preventDefault()}>
+      <Space>
+        Click me
+        <DownOutlined />
+      </Space>
     </a>
-  </Dropdown>,
-  mountNode,
+  </Dropdown>
 );
+
+export default App;
 ```

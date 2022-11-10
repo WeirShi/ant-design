@@ -1,21 +1,23 @@
-import * as React from 'react';
-import classNames from 'classnames';
 import CaretDownOutlined from '@ant-design/icons/CaretDownOutlined';
 import CaretUpOutlined from '@ant-design/icons/CaretUpOutlined';
-import {
-  TransformColumns,
-  ColumnsType,
-  Key,
-  ColumnType,
-  SortOrder,
-  CompareFn,
-  ColumnTitleProps,
-  SorterResult,
+import classNames from 'classnames';
+import KeyCode from 'rc-util/lib/KeyCode';
+import * as React from 'react';
+import type { TooltipProps } from '../../tooltip';
+import Tooltip from '../../tooltip';
+import type {
   ColumnGroupType,
+  ColumnsType,
+  ColumnTitleProps,
+  ColumnType,
+  CompareFn,
+  Key,
+  SorterResult,
+  SortOrder,
   TableLocale,
+  TransformColumns,
 } from '../interface';
-import Tooltip, { TooltipProps } from '../../tooltip';
-import { getColumnKey, getColumnPos, renderColumnTitle } from '../util';
+import { getColumnKey, getColumnPos, renderColumnTitle, safeColumnTitle } from '../util';
 
 const ASCEND = 'ascend';
 const DESCEND = 'descend';
@@ -104,7 +106,7 @@ function collectSortStates<RecordType>(
 function injectSorter<RecordType>(
   prefixCls: string,
   columns: ColumnsType<RecordType>,
-  sorterSates: SortState<RecordType>[],
+  sorterStates: SortState<RecordType>[],
   triggerSorter: (sorterSates: SortState<RecordType>) => void,
   defaultSortDirections: SortOrder[],
   tableLocale?: TableLocale,
@@ -122,7 +124,7 @@ function injectSorter<RecordType>(
           ? tableShowSorterTooltip
           : newColumn.showSorterTooltip;
       const columnKey = getColumnKey(newColumn, columnPos);
-      const sorterState = sorterSates.find(({ key }) => key === columnKey);
+      const sorterState = sorterStates.find(({ key }) => key === columnKey);
       const sorterOrder = sorterState ? sorterState.sortOrder : null;
       const nextSortOrder = nextSortDirection(sortDirections, sorterOrder);
       const upNode: React.ReactNode = sortDirections.includes(ASCEND) && (
@@ -130,6 +132,7 @@ function injectSorter<RecordType>(
           className={classNames(`${prefixCls}-column-sorter-up`, {
             active: sorterOrder === ASCEND,
           })}
+          role="presentation"
         />
       );
       const downNode: React.ReactNode = sortDirections.includes(DESCEND) && (
@@ -137,6 +140,7 @@ function injectSorter<RecordType>(
           className={classNames(`${prefixCls}-column-sorter-down`, {
             active: sorterOrder === DESCEND,
           })}
+          role="presentation"
         />
       );
       const { cancelSort, triggerAsc, triggerDesc } = tableLocale || {};
@@ -179,6 +183,7 @@ function injectSorter<RecordType>(
           const cell: React.HTMLAttributes<HTMLElement> =
             (column.onHeaderCell && column.onHeaderCell(col)) || {};
           const originOnClick = cell.onClick;
+          const originOKeyDown = cell.onKeyDown;
           cell.onClick = (event: React.MouseEvent<HTMLElement>) => {
             triggerSorter({
               column,
@@ -186,14 +191,36 @@ function injectSorter<RecordType>(
               sortOrder: nextSortOrder,
               multiplePriority: getMultiplePriority(column),
             });
-
-            if (originOnClick) {
-              originOnClick(event);
+            originOnClick?.(event);
+          };
+          cell.onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+            if (event.keyCode === KeyCode.ENTER) {
+              triggerSorter({
+                column,
+                key: columnKey,
+                sortOrder: nextSortOrder,
+                multiplePriority: getMultiplePriority(column),
+              });
+              originOKeyDown?.(event);
             }
           };
 
-          cell.className = classNames(cell.className, `${prefixCls}-column-has-sorters`);
+          const renderTitle = safeColumnTitle(column.title, {});
+          const displayTitle = renderTitle?.toString();
 
+          // Inform the screen-reader so it can tell the visually impaired user which column is sorted
+          if (sorterOrder) {
+            cell['aria-sort'] = sorterOrder === 'ascend' ? 'ascending' : 'descending';
+          } else {
+            cell['aria-label'] = `${
+              displayTitle ? `this column's title is ${displayTitle},` : ''
+            }this column is sortable`;
+          }
+          cell.className = classNames(cell.className, `${prefixCls}-column-has-sorters`);
+          cell.tabIndex = 0;
+          if (column.ellipsis) {
+            cell.title = (renderTitle ?? '').toString();
+          }
           return cell;
         },
       };
@@ -205,7 +232,7 @@ function injectSorter<RecordType>(
         children: injectSorter(
           prefixCls,
           newColumn.children,
-          sorterSates,
+          sorterStates,
           triggerSorter,
           defaultSortDirections,
           tableLocale,

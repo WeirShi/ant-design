@@ -54,6 +54,12 @@ const columns = [
 <Table dataSource={dataSource} columns={columns} />;
 ```
 
+## Promotion
+
+- [Kitchen Sketch Plugin 💎](https://kitchen.alipay.com)
+- [ProTable - Advanced Tables](https://procomponents.ant.design/en-US/components/table)
+- [S2 - Analytical Tables](https://github.com/antvis/s2/)
+
 ## API
 
 ### Table
@@ -62,7 +68,7 @@ const columns = [
 | --- | --- | --- | --- | --- |
 | bordered | Whether to show all table borders | boolean | false |  |
 | columns | Columns of table | [ColumnsType](#Column)\[] | - |  |
-| components | Override default table elements | [TableComponents](https://git.io/fANxz) | - |  |
+| components | Override default table elements | [TableComponents](https://github.com/react-component/table/blob/75ee0064e54a4b3215694505870c9d6c817e9e4a/src/interface.ts#L129) | - |  |
 | dataSource | Data record array to be displayed | object\[] | - |  |
 | expandable | Config expandable content | [expandable](#expandable) | - |  |
 | footer | Table footer renderer | function(currentPageData) | - |  |
@@ -120,17 +126,17 @@ One of the Table `columns` prop for describing the table's columns, Column has t
 | colSpan | Span of this column's title | number | - |  |
 | dataIndex | Display field of the data record, support nest path by string array | string \| string\[] | - |  |
 | defaultFilteredValue | Default filtered values | string\[] | - |  |
+| filterResetToDefaultFilteredValue | click the reset button, whether to restore the default filter | boolean | false |  |
 | defaultSortOrder | Default order of sorted values | `ascend` \| `descend` | - |  |
-| editable | Whether column can be edited | boolean | false |  |
 | ellipsis | The ellipsis cell content, not working with sorter and filters for now.<br />tableLayout would be `fixed` when `ellipsis` is `true` or `{ showTitle?: boolean }` | boolean \| {showTitle?: boolean } | false | showTitle: 4.3.0 |
 | filterDropdown | Customized filter overlay | ReactNode \| (props: [FilterDropdownProps](https://github.com/ant-design/ant-design/blob/ecc54dda839619e921c0ace530408871f0281c2a/components/table/interface.tsx#L79)) => ReactNode | - |  |
-| filterDropdownVisible | Whether `filterDropdown` is visible | boolean | - |  |
+| filterDropdownOpen | Whether `filterDropdown` is visible | boolean | - | 4.23.0 |
 | filtered | Whether the `dataSource` is filtered | boolean | false |  |
 | filteredValue | Controlled filtered value, filter icon will highlight | string\[] | - |  |
 | filterIcon | Customized filter icon | ReactNode \| (filtered: boolean) => ReactNode | - |  |
 | filterMultiple | Whether multiple filters can be selected | boolean | true |  |
 | filterMode | To specify the filter interface | 'menu' \| 'tree' | 'menu' | 4.17.0 |
-| filterSearch | Whether to be searchable for filter menu | Boolean | false | 4.17.0 |
+| filterSearch | Whether to be searchable for filter menu | boolean \| function(input, record):boolean | false | boolean:4.17.0 function:4.19.0 |
 | filters | Filter menu config | object\[] | - |  |
 | fixed | (IE not support) Set column to be fixed: `true`(same as left) `'left'` `'right'` | boolean \| string | false |  |
 | key | Unique key of this column, you can ignore this prop if you've set a unique `dataIndex` | string | - |  |
@@ -140,12 +146,12 @@ One of the Table `columns` prop for describing the table's columns, Column has t
 | showSorterTooltip | If header show next sorter direction tooltip, override `showSorterTooltip` in table | boolean \| [Tooltip props](/components/tooltip/) | true |  |
 | sortDirections | Supported sort way, override `sortDirections` in `Table`, could be `ascend`, `descend` | Array | \[`ascend`, `descend`] |  |
 | sorter | Sort function for local sort, see [Array.sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)'s compareFunction. If you need sort buttons only, set to `true` | function \| boolean | - |  |
-| sortOrder | Order of sorted values: `'ascend'` `'descend'` `false` | boolean \| string | - |  |
+| sortOrder | Order of sorted values: `ascend` `descend` `null` | `ascend` \| `descend` \| null | - |  |
 | title | Title of this column | ReactNode \| ({ sortOrder, sortColumn, filters }) => ReactNode | - |  |
 | width | Width of this column ([width not working?](https://github.com/ant-design/ant-design/issues/13825#issuecomment-449889241)) | string \| number | - |  |
 | onCell | Set props on per cell | function(record, rowIndex) | - |  |
 | onFilter | Function that determines if the row is displayed when filtered | function(value, record) => boolean | - |  |
-| onFilterDropdownVisibleChange | Callback executed when `filterDropdownVisible` is changed | function(visible) {} | - |  |
+| onFilterDropdownOpenChange | Callback executed when `filterDropdownOpen` is changed | function(open) {} | - | 4.23.0 |
 | onHeaderCell | Set props on per header cell | function(column) | - |  |
 
 ### ColumnGroup
@@ -171,6 +177,7 @@ Properties for expandable.
 | Property | Description | Type | Default | Version |
 | --- | --- | --- | --- | --- |
 | childrenColumnName | The column contains children to display | string | children |  |
+| columnTitle | Set the title of the expand column | ReactNode | - | 4.23.0 |
 | columnWidth | Set the width of the expand column | string \| number | - |  |
 | defaultExpandAllRows | Expand all rows initially | boolean | false |  |
 | defaultExpandedRowKeys | Initial expanded row keys | string\[] | - |  |
@@ -203,11 +210,12 @@ Properties for row selection.
 | selectedRowKeys | Controlled selected row keys | string\[] \| number\[] | \[] |  |
 | selections | Custom selection [config](#selection), only displays default selections when set to `true` | object\[] \| boolean | - |  |
 | type | `checkbox` or `radio` | `checkbox` \| `radio` | `checkbox` |  |
-| onChange | Callback executed when selected rows change | function(selectedRowKeys, selectedRows) | - |  |
+| onChange | Callback executed when selected rows change | function(selectedRowKeys, selectedRows, info: { type }) | - | `info.type`: 4.21.0 |
 | onSelect | Callback executed when select/deselect one row | function(record, selected, selectedRows, nativeEvent) | - |  |
 | onSelectAll | Callback executed when select/deselect all rows | function(selected, selectedRows, changeRows) | - |  |
 | onSelectInvert | Callback executed when row selection is inverted | function(selectedRowKeys) | - |  |
 | onSelectNone | Callback executed when row selection is cleared | function() | - |  |
+| onSelectMultiple | Callback executed when row selection is changed by pressing shift | function(selected, selectedRows, changeRows) | - |  |
 
 ### scroll
 
@@ -310,3 +318,7 @@ Table can not tell what state used in `columns.render`, so it always need fully 
 ### How to handle fixed column display over the mask layout?
 
 Fixed column use `z-index` to make it over other columns. You will find sometime fixed columns also over your mask layout. You can set `z-index` on your mask layout to resolve.
+
+### How to custom render Table Checkbox（For example, adding Tooltip）?
+
+Since `4.1.0`, You can use [`rowSelection.renderCell`](https://ant.design/components/table/#rowSelection) to custom render Table Checkbox. If you want to add Tooltip, please refer to this [demo](https://codesandbox.io/s/table-row-tooltip-v79j2v).

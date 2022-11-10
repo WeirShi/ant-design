@@ -1,12 +1,13 @@
-import * as React from 'react';
-import useRCNotification from 'rc-notification/lib/useNotification';
-import {
-  NotificationInstance as RCNotificationInstance,
-  NoticeContent as RCNoticeContent,
+import type {
   HolderReadyCallback as RCHolderReadyCallback,
+  NoticeContent as RCNoticeContent,
+  NotificationInstance as RCNotificationInstance,
 } from 'rc-notification/lib/Notification';
-import { ConfigConsumer, ConfigConsumerProps } from '../../config-provider';
-import { NotificationInstance, ArgsProps } from '..';
+import useRCNotification from 'rc-notification/lib/useNotification';
+import * as React from 'react';
+import type { ArgsProps, NotificationInstance } from '..';
+import type { ConfigConsumerProps } from '../../config-provider';
+import { ConfigConsumer } from '../../config-provider';
 
 export default function createUseNotification(
   getNotificationInstance: (
@@ -15,7 +16,7 @@ export default function createUseNotification(
   ) => void,
   getRCNoticeProps: (args: ArgsProps, prefixCls: string) => RCNoticeContent,
 ) {
-  const useNotification = (): [NotificationInstance, React.ReactElement] => {
+  const useNotification = (): readonly [NotificationInstance, React.ReactElement] => {
     // We can only get content by render
     let getPrefixCls: ConfigConsumerProps['getPrefixCls'];
 
@@ -66,7 +67,7 @@ export default function createUseNotification(
           return holder;
         }}
       </ConfigConsumer>,
-    ];
+    ] as const;
   };
 
   return useNotification;

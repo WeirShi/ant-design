@@ -13,47 +13,65 @@ title:
 
 Multiple selection usage.
 
-```jsx
+```tsx
 import { TreeSelect } from 'antd';
+import React, { useState } from 'react';
 
-const { TreeNode } = TreeSelect;
+const treeData = [
+  {
+    value: 'parent 1',
+    title: 'parent 1',
+    children: [
+      {
+        value: 'parent 1-0',
+        title: 'parent 1-0',
+        children: [
+          {
+            value: 'leaf1',
+            title: 'my leaf',
+          },
+          {
+            value: 'leaf2',
+            title: 'your leaf',
+          },
+        ],
+      },
+      {
+        value: 'parent 1-1',
+        title: 'parent 1-1',
+        children: [
+          {
+            value: 'sss',
+            title: <b style={{ color: '#08c' }}>sss</b>,
+          },
+        ],
+      },
+    ],
+  },
+];
+const App: React.FC = () => {
+  const [value, setValue] = useState<string>();
 
-class Demo extends React.Component {
-  state = {
-    value: undefined,
+  const onChange = (newValue: string) => {
+    console.log(newValue);
+    setValue(newValue);
   };
 
-  onChange = value => {
-    console.log(value);
-    this.setState({ value });
-  };
+  return (
+    <TreeSelect
+      showSearch
+      style={{ width: '100%' }}
+      value={value}
+      dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+      placeholder="Please select"
+      allowClear
+      multiple
+      treeDefaultExpandAll
+      onChange={onChange}
+      treeData={treeData}
+    />
+  );
+};
 
-  render() {
-    return (
-      <TreeSelect
-        showSearch
-        style={{ width: '100%' }}
-        value={this.state.value}
-        dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
-        placeholder="Please select"
-        allowClear
-        multiple
-        treeDefaultExpandAll
-        onChange={this.onChange}
-      >
-        <TreeNode value="parent 1" title="parent 1">
-          <TreeNode value="parent 1-0" title="parent 1-0">
-            <TreeNode value="leaf1" title="my leaf" />
-            <TreeNode value="leaf2" title="your leaf" />
-          </TreeNode>
-          <TreeNode value="parent 1-1" title="parent 1-1">
-            <TreeNode value="sss" title={<b style={{ color: '#08c' }}>sss</b>} />
-          </TreeNode>
-        </TreeNode>
-      </TreeSelect>
-    );
-  }
-}
-
-ReactDOM.render(<Demo />, mountNode);
+export default App;
 ```

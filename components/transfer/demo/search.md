@@ -13,61 +13,68 @@ title:
 
 Transfer with a search box.
 
-```jsx
+```tsx
 import { Transfer } from 'antd';
+import type { TransferDirection } from 'antd/es/transfer';
+import React, { useEffect, useState } from 'react';
 
-class App extends React.Component {
-  state = {
-    mockData: [],
-    targetKeys: [],
-  };
+interface RecordType {
+  key: string;
+  title: string;
+  description: string;
+  chosen: boolean;
+}
 
-  componentDidMount() {
-    this.getMock();
-  }
+const App: React.FC = () => {
+  const [mockData, setMockData] = useState<RecordType[]>([]);
+  const [targetKeys, setTargetKeys] = useState<string[]>([]);
 
-  getMock = () => {
-    const targetKeys = [];
-    const mockData = [];
+  const getMock = () => {
+    const tempTargetKeys = [];
+    const tempMockData = [];
     for (let i = 0; i < 20; i++) {
       const data = {
         key: i.toString(),
         title: `content${i + 1}`,
         description: `description of content${i + 1}`,
-        chosen: Math.random() * 2 > 1,
+        chosen: i % 2 === 0,
       };
       if (data.chosen) {
-        targetKeys.push(data.key);
+        tempTargetKeys.push(data.key);
       }
-      mockData.push(data);
+      tempMockData.push(data);
     }
-    this.setState({ mockData, targetKeys });
+    setMockData(tempMockData);
+    setTargetKeys(tempTargetKeys);
   };
 
-  filterOption = (inputValue, option) => option.description.indexOf(inputValue) > -1;
+  useEffect(() => {
+    getMock();
+  }, []);
 
-  handleChange = targetKeys => {
-    this.setState({ targetKeys });
+  const filterOption = (inputValue: string, option: RecordType) =>
+    option.description.indexOf(inputValue) > -1;
+
+  const handleChange = (newTargetKeys: string[]) => {
+    setTargetKeys(newTargetKeys);
   };
 
-  handleSearch = (dir, value) => {
+  const handleSearch = (dir: TransferDirection, value: string) => {
     console.log('search:', dir, value);
   };
 
-  render() {
-    return (
-      <Transfer
-        dataSource={this.state.mockData}
-        showSearch
-        filterOption={this.filterOption}
-        targetKeys={this.state.targetKeys}
-        onChange={this.handleChange}
-        onSearch={this.handleSearch}
-        render={item => item.title}
-      />
-    );
-  }
-}
+  return (
+    <Transfer
+      dataSource={mockData}
+      showSearch
+      filterOption={filterOption}
+      targetKeys={targetKeys}
+      onChange={handleChange}
+      onSearch={handleSearch}
+      render={item => item.title}
+    />
+  );
+};
 
-ReactDOM.render(<App />, mountNode);
+export default App;
 ```

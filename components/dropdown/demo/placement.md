@@ -13,54 +13,64 @@ title:
 
 Support 6 placements.
 
-```jsx
-import { Menu, Dropdown, Button, Space } from 'antd';
+```tsx
+import type { MenuProps } from 'antd';
+import { Button, Dropdown, Space } from 'antd';
+import React from 'react';
 
-const menu = (
-  <Menu>
-    <Menu.Item>
+const items: MenuProps['items'] = [
+  {
+    key: '1',
+    label: (
       <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
         1st menu item
       </a>
-    </Menu.Item>
-    <Menu.Item>
+    ),
+  },
+  {
+    key: '2',
+    label: (
       <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
         2nd menu item
       </a>
-    </Menu.Item>
-    <Menu.Item>
+    ),
+  },
+  {
+    key: '3',
+    label: (
       <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
         3rd menu item
       </a>
-    </Menu.Item>
-  </Menu>
-);
+    ),
+  },
+];
 
-ReactDOM.render(
+const App: React.FC = () => (
   <Space direction="vertical">
     <Space wrap>
-      <Dropdown overlay={menu} placement="bottomLeft">
+      <Dropdown menu={{ items }} placement="bottomLeft">
         <Button>bottomLeft</Button>
       </Dropdown>
-      <Dropdown overlay={menu} placement="bottomCenter">
-        <Button>bottomCenter</Button>
+      <Dropdown menu={{ items }} placement="bottom">
+        <Button>bottom</Button>
       </Dropdown>
-      <Dropdown overlay={menu} placement="bottomRight">
+      <Dropdown menu={{ items }} placement="bottomRight">
         <Button>bottomRight</Button>
       </Dropdown>
     </Space>
     <Space wrap>
-      <Dropdown overlay={menu} placement="topLeft">
+      <Dropdown menu={{ items }} placement="topLeft">
         <Button>topLeft</Button>
       </Dropdown>
-      <Dropdown overlay={menu} placement="topCenter">
-        <Button>topCenter</Button>
+      <Dropdown menu={{ items }} placement="top">
+        <Button>top</Button>
       </Dropdown>
-      <Dropdown overlay={menu} placement="topRight">
+      <Dropdown menu={{ items }} placement="topRight">
         <Button>topRight</Button>
       </Dropdown>
     </Space>
-  </Space>,
-  mountNode,
+  </Space>
 );
+
+export default App;
 ```

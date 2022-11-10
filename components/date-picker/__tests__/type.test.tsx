@@ -1,7 +1,7 @@
+import type { Moment } from 'moment';
 import * as React from 'react';
-import { Moment } from 'moment';
 import DatePicker from '..';
-import { DatePickRef, RangePickerRef } from '../generatePicker/interface';
+import type { DatePickRef, RangePickerRef } from '../generatePicker/interface';
 
 describe('DatePicker.typescript', () => {
   it('DatePicker ref methods', () => {
@@ -57,5 +57,12 @@ describe('DatePicker.typescript', () => {
       />
     );
     expect(datePicker).toBeTruthy();
+  });
+
+  it('DatePicker and RangePicker supports popupClassName', () => {
+    const datePicker = <DatePicker popupClassName="popupClassName" />;
+    expect(datePicker).toBeTruthy();
+    const rangePicker = <DatePicker.RangePicker popupClassName="popupClassName" />;
+    expect(rangePicker).toBeTruthy();
   });
 });

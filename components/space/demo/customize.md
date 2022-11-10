@@ -1,5 +1,5 @@
 ---
-order: 3
+order: 5
 title:
   zh-CN: 自定义尺寸
   en-US: Customize Size
@@ -13,11 +13,11 @@ title:
 
 Custom spacing size.
 
-```jsx
+```tsx
+import { Button, Slider, Space } from 'antd';
 import React, { useState } from 'react';
-import { Space, Slider, Button } from 'antd';
 
-function SpaceCustomizeSize() {
+const App: React.FC = () => {
   const [size, setSize] = useState(8);
 
   return (
@@ -33,7 +33,7 @@ function SpaceCustomizeSize() {
       </Space>
     </>
   );
-}
+};
 
-ReactDOM.render(<SpaceCustomizeSize />, mountNode);
+export default App;
 ```

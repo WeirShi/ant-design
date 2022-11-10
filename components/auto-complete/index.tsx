@@ -6,20 +6,23 @@
  * - CustomizeInput not feedback `ENTER` key since accessibility enhancement
  */
 
-import * as React from 'react';
-import toArray from 'rc-util/lib/Children/toArray';
 import classNames from 'classnames';
-import omit from 'rc-util/lib/omit';
 import type { BaseSelectRef } from 'rc-select';
-import Select, {
+import toArray from 'rc-util/lib/Children/toArray';
+import omit from 'rc-util/lib/omit';
+import * as React from 'react';
+import type { ConfigConsumerProps } from '../config-provider';
+import { ConfigConsumer } from '../config-provider';
+import type {
   BaseOptionType,
   DefaultOptionType,
   InternalSelectProps,
   RefSelectProps,
 } from '../select';
-import { ConfigConsumer, ConfigConsumerProps } from '../config-provider';
-import devWarning from '../_util/devWarning';
+import Select from '../select';
 import { isValidElement } from '../_util/reactNode';
+import type { InputStatus } from '../_util/statusUtils';
+import warning from '../_util/warning';
 
 const { Option } = Select;
 
@@ -37,6 +40,13 @@ export interface AutoCompleteProps<
     'inputIcon' | 'loading' | 'mode' | 'optionLabelProp' | 'labelInValue'
   > {
   dataSource?: DataSourceItemType[];
+  status?: InputStatus;
+  /**
+   * @deprecated `dropdownClassName` is deprecated which will be removed in next major version.
+   *   Please use `popupClassName` instead.
+   */
+  dropdownClassName?: string;
+  popupClassName?: string;
 }
 
 function isSelectOptionOrSelectOptGroup(child: any): Boolean {
@@ -47,7 +57,14 @@ const AutoComplete: React.ForwardRefRenderFunction<RefSelectProps, AutoCompleteP
   props,
   ref,
 ) => {
-  const { prefixCls: customizePrefixCls, className, children, dataSource } = props;
+  const {
+    prefixCls: customizePrefixCls,
+    className,
+    popupClassName,
+    dropdownClassName,
+    children,
+    dataSource,
+  } = props;
   const childNodes: React.ReactElement[] = toArray(children);
 
   // ============================= Input =============================
@@ -91,26 +108,34 @@ const AutoComplete: React.ForwardRefRenderFunction<RefSelectProps, AutoCompleteP
               );
             }
             default:
-              throw new Error('AutoComplete[dataSource] only supports type `string[] | Object[]`.');
+              warning(
+                false,
+                'AutoComplete',
+                '`dataSource` is only supports type `string[] | Object[]`.',
+              );
+              return undefined;
           }
         })
       : [];
   }
 
-  // ============================ Warning ============================
-  React.useEffect(() => {
-    devWarning(
-      !('dataSource' in props),
-      'AutoComplete',
-      '`dataSource` is deprecated, please use `options` instead.',
-    );
+  warning(
+    !('dataSource' in props),
+    'AutoComplete',
+    '`dataSource` is deprecated, please use `options` instead.',
+  );
 
-    devWarning(
-      !customizeInput || !('size' in props),
-      'AutoComplete',
-      'You need to control style self instead of setting `size` when using customize input.',
-    );
-  }, []);
+  warning(
+    !dropdownClassName,
+    'AutoComplete',
+    '`dropdownClassName` is deprecated which will be removed in next major version. Please use `popupClassName` instead.',
+  );
+
+  warning(
+    !customizeInput || !('size' in props),
+    'AutoComplete',
+    'You need to control style self instead of setting `size` when using customize input.',
+  );
 
   return (
     <ConfigConsumer>
@@ -122,6 +147,7 @@ const AutoComplete: React.ForwardRefRenderFunction<RefSelectProps, AutoCompleteP
             ref={ref}
             {...omit(props, ['dataSource'])}
             prefixCls={prefixCls}
+            popupClassName={popupClassName || dropdownClassName}
             className={classNames(`${prefixCls}-auto-complete`, className)}
             mode={Select.SECRET_COMBOBOX_MODE_DO_NOT_USE as any}
             {...{

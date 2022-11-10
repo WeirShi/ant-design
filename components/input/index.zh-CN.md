@@ -21,15 +21,16 @@ cover: https://gw.alipayobjects.com/zos/alicdn/xS9YEJhfe/Input.svg
 | --- | --- | --- | --- | --- |
 | addonAfter | 带标签的 input，设置后置标签 | ReactNode | - |  |
 | addonBefore | 带标签的 input，设置前置标签 | ReactNode | - |  |
-| allowClear | 可以点击清除图标删除内容 | boolean | - |  |
+| allowClear | 可以点击清除图标删除内容 | boolean \| { clearIcon: ReactNode } | - |  |
 | bordered | 是否有边框 | boolean | true | 4.5.0 |
 | defaultValue | 输入框默认内容 | string | - |  |
 | disabled | 是否禁用状态，默认为 false | boolean | false |  |
 | id | 输入框的 id | string | - |  |
 | maxLength | 最大长度 | number | - |  |
-| showCount | 是否展示字数 | boolean \| { formatter: ({ count: number, maxLength?: number }) => ReactNode } | false | 4.18.0 |
+| showCount | 是否展示字数 | boolean \| { formatter: (info: { value: string, count: number, maxLength?: number }) => ReactNode } | false | 4.18.0 info.value: 4.23.0 |
+| status | 设置校验状态 | 'error' \| 'warning' | - | 4.19.0 |
 | prefix | 带有前缀图标的 input | ReactNode | - |  |
-| size | 控件大小。注：标准表单内的输入框大小限制为 `large` | `large` \| `middle` \| `small` | - |  |
+| size | 控件大小。注：标准表单内的输入框大小限制为 `middle` | `large` \| `middle` \| `small` | - |  |
 | suffix | 带有后缀图标的 input | ReactNode | - |  |
 | type | 声明 input 类型，同原生 input 标签的 type 属性，见：[MDN](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input#属性)(请直接使用 `Input.TextArea` 代替 `type="textarea"`) | string | `text` |  |
 | value | 输入框内容 | string | - |  |
@@ -49,7 +50,7 @@ Input 的其他属性和 React 自带的 [input](https://reactjs.org/docs/dom-el
 | bordered | 是否有边框 | boolean | true | 4.5.0 |
 | defaultValue | 输入框默认内容 | string | - |  |
 | maxLength | 内容最大长度 | number | - | 4.7.0 |
-| showCount | 是否展示字数 | boolean \| { formatter: ({ count: number, maxLength?: number }) => string } | false | 4.7.0 (formatter: 4.10.0) |
+| showCount | 是否展示字数 | boolean \| { formatter: (info: { value: string, count: number, maxLength?: number }) => string } | false | 4.7.0 formatter: 4.10.0 info.value: 4.23.0 |
 | value | 输入框内容 | string | - |  |
 | onPressEnter | 按下回车的回调 | function(e) | - |  |
 | onResize | resize 回调 | function({ width, height }) | - |  |
@@ -85,7 +86,14 @@ Input 的其他属性和 React 自带的 [input](https://reactjs.org/docs/dom-el
 | 参数 | 说明 | 类型 | 默认值 | 版本 |
 | --- | --- | --- | --- | --- |
 | iconRender | 自定义切换按钮 | (visible) => ReactNode | (visible) => (visible ? &lt;EyeOutlined /> : &lt;EyeInvisibleOutlined />) | 4.3.0 |
-| visibilityToggle | 是否显示切换按钮 | boolean | true |  |
+| visibilityToggle | 是否显示切换按钮或者控制密码显隐 | boolean \| [VisibilityToggle](#VisibilityToggle) | true |  |
+
+#### VisibilityToggle
+
+| Property        | Description          | Type    | Default | Version |
+| --------------- | -------------------- | ------- | ------- | ------- |
+| visible         | 用于手动控制密码显隐 | boolean | false   | 4.24    |
+| onVisibleChange | 显隐密码的回调       | boolean | -       | 4.24    |
 
 #### Input Methods
 
@@ -96,9 +104,9 @@ Input 的其他属性和 React 自带的 [input](https://reactjs.org/docs/dom-el
 
 ## FAQ
 
-### 为什么我动态改变 `prefix/suffix` 时，Input 会失去焦点？
+### 为什么我动态改变 `prefix/suffix/showCount` 时，Input 会失去焦点？
 
-当 Input 动态添加或者删除 `prefix/suffix` 时，React 会重新创建 DOM 结构而新的 input 是没有焦点的。你可以预设一个空的 `<span />` 来保持 DOM 结构不变：
+当 Input 动态添加或者删除 `prefix/suffix/showCount` 时，React 会重新创建 DOM 结构而新的 input 是没有焦点的。你可以预设一个空的 `<span />` 来保持 DOM 结构不变：
 
 ```jsx
 const suffix = condition ? <Icon type="smile" /> : <span />;

@@ -1,5 +1,5 @@
-import * as React from 'react';
 import classNames from 'classnames';
+import * as React from 'react';
 import { ConfigContext } from '../config-provider';
 import { cloneElement } from '../_util/reactNode';
 import SingleNumber from './SingleNumber';
@@ -75,7 +75,7 @@ const ScrollNumber: React.FC<ScrollNumberProps> = ({
       className: classNames(`${prefixCls}-custom-component`, oriProps?.className, motionClassName),
     }));
   }
-  return React.createElement(component as any, newProps, numberNodes);
+  return React.createElement(component, newProps, numberNodes);
 };
 
 export default ScrollNumber;

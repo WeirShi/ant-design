@@ -13,17 +13,32 @@ title:
 
 Steps with progress.
 
-```jsx
+```tsx
 import { Steps } from 'antd';
+import React from 'react';
 
-const { Step } = Steps;
-
-ReactDOM.render(
-  <Steps current={1} percent={60}>
-    <Step title="Finished" description="This is a description." />
-    <Step title="In Progress" subTitle="Left 00:00:08" description="This is a description." />
-    <Step title="Waiting" description="This is a description." />
-  </Steps>,
-  mountNode,
+const description = 'This is a description.';
+const App: React.FC = () => (
+  <Steps
+    current={1}
+    percent={60}
+    items={[
+      {
+        title: 'Finished',
+        description,
+      },
+      {
+        title: 'In Progress',
+        subTitle: 'Left 00:00:08',
+        description,
+      },
+      {
+        title: 'Waiting',
+        description,
+      },
+    ]}
+  />
 );
+
+export default App;
 ```

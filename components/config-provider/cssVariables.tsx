@@ -1,13 +1,15 @@
 /* eslint-disable import/prefer-default-export, prefer-destructuring */
 
-import { updateCSS } from 'rc-util/lib/Dom/dynamicCSS';
-import { TinyColor } from '@ctrl/tinycolor';
 import { generate } from '@ant-design/colors';
-import { Theme } from './context';
+import { TinyColor } from '@ctrl/tinycolor';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
+import { updateCSS } from 'rc-util/lib/Dom/dynamicCSS';
+import warning from '../_util/warning';
+import type { Theme } from './context';
 
 const dynamicStyleMark = `-ant-${Date.now()}-${Math.random()}`;
 
-export function registerTheme(globalPrefixCls: string, theme: Theme) {
+export function getStyle(globalPrefixCls: string, theme: Theme) {
   const variables: Record<string, string> = {};
 
   const formatColor = (
@@ -26,10 +28,10 @@ export function registerTheme(globalPrefixCls: string, theme: Theme) {
     variables[`${type}-color`] = formatColor(baseColor);
     variables[`${type}-color-disabled`] = colorPalettes[1];
     variables[`${type}-color-hover`] = colorPalettes[4];
-    variables[`${type}-color-active`] = colorPalettes[7];
+    variables[`${type}-color-active`] = colorPalettes[6];
     variables[`${type}-color-outline`] = baseColor.clone().setAlpha(0.2).toRgbString();
-    variables[`${type}-color-deprecated-bg`] = colorPalettes[1];
-    variables[`${type}-color-deprecated-border`] = colorPalettes[3];
+    variables[`${type}-color-deprecated-bg`] = colorPalettes[0];
+    variables[`${type}-color-deprecated-border`] = colorPalettes[2];
   };
 
   // ================ Primary Color ================
@@ -86,12 +88,19 @@ export function registerTheme(globalPrefixCls: string, theme: Theme) {
     key => `--${globalPrefixCls}-${key}: ${variables[key]};`,
   );
 
-  updateCSS(
-    `
+  return `
   :root {
     ${cssList.join('\n')}
   }
-  `,
-    `${dynamicStyleMark}-dynamic-theme`,
-  );
+  `.trim();
+}
+
+export function registerTheme(globalPrefixCls: string, theme: Theme) {
+  const style = getStyle(globalPrefixCls, theme);
+
+  if (canUseDom()) {
+    updateCSS(style, `${dynamicStyleMark}-dynamic-theme`);
+  } else {
+    warning(false, 'ConfigProvider', 'SSR do not support dynamic theme with css variables.');
+  }
 }

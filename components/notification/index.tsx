@@ -1,16 +1,26 @@
-import * as React from 'react';
-import Notification from 'rc-notification';
-import { NotificationInstance as RCNotificationInstance } from 'rc-notification/lib/Notification';
-import CloseOutlined from '@ant-design/icons/CloseOutlined';
-import classNames from 'classnames';
 import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import CloseCircleOutlined from '@ant-design/icons/CloseCircleOutlined';
+import CloseOutlined from '@ant-design/icons/CloseOutlined';
 import ExclamationCircleOutlined from '@ant-design/icons/ExclamationCircleOutlined';
 import InfoCircleOutlined from '@ant-design/icons/InfoCircleOutlined';
-import createUseNotification from './hooks/useNotification';
+import classNames from 'classnames';
+import Notification from 'rc-notification';
+import type { NotificationInstance as RCNotificationInstance } from 'rc-notification/lib/Notification';
+import * as React from 'react';
 import ConfigProvider, { globalConfig } from '../config-provider';
+import createUseNotification from './hooks/useNotification';
 
-export type NotificationPlacement = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+interface DivProps extends React.HTMLProps<HTMLDivElement> {
+  'data-testid'?: string;
+}
+
+export type NotificationPlacement =
+  | 'top'
+  | 'topLeft'
+  | 'topRight'
+  | 'bottom'
+  | 'bottomLeft'
+  | 'bottomRight';
 
 export type IconType = 'success' | 'info' | 'error' | 'warning';
 
@@ -37,6 +47,7 @@ export interface ConfigProps {
   closeIcon?: React.ReactNode;
   rtl?: boolean;
   maxCount?: number;
+  props?: DivProps;
 }
 
 function setNotificationConfig(options: ConfigProps) {
@@ -79,6 +90,15 @@ function getPlacementStyle(
 ) {
   let style;
   switch (placement) {
+    case 'top':
+      style = {
+        left: '50%',
+        transform: 'translateX(-50%)',
+        right: 'auto',
+        top,
+        bottom: 'auto',
+      };
+      break;
     case 'topLeft':
       style = {
         left: 0,
@@ -91,6 +111,15 @@ function getPlacementStyle(
         right: 0,
         top,
         bottom: 'auto',
+      };
+      break;
+    case 'bottom':
+      style = {
+        left: '50%',
+        transform: 'translateX(-50%)',
+        right: 'auto',
+        top: 'auto',
+        bottom,
       };
       break;
     case 'bottomLeft':
@@ -132,6 +161,7 @@ function getNotificationInstance(
 
   const cacheKey = `${prefixCls}-${placement}`;
   const cacheInstance = notificationInstance[cacheKey];
+
   if (cacheInstance) {
     Promise.resolve(cacheInstance).then(instance => {
       callback({ prefixCls: `${prefixCls}-notice`, iconPrefixCls, instance });
@@ -181,6 +211,7 @@ export interface ArgsProps {
   duration?: number | null;
   icon?: React.ReactNode;
   placement?: NotificationPlacement;
+  maxCount?: number;
   style?: React.CSSProperties;
   prefixCls?: string;
   className?: string;
@@ -190,6 +221,7 @@ export interface ArgsProps {
   bottom?: number;
   getContainer?: () => HTMLElement;
   closeIcon?: React.ReactNode;
+  props?: DivProps;
 }
 
 function getRCNoticeProps(args: ArgsProps, prefixCls: string, iconPrefixCls?: string) {
@@ -206,6 +238,7 @@ function getRCNoticeProps(args: ArgsProps, prefixCls: string, iconPrefixCls?: st
     style,
     className,
     closeIcon = defaultCloseIcon,
+    props,
   } = args;
 
   const duration = durationArg === undefined ? defaultDuration : durationArg;
@@ -254,6 +287,7 @@ function getRCNoticeProps(args: ArgsProps, prefixCls: string, iconPrefixCls?: st
     className: classNames(className, {
       [`${prefixCls}-${type}`]: !!type,
     }),
+    props,
   };
 }
 
@@ -312,7 +346,7 @@ export interface NotificationApi extends NotificationInstance {
   useNotification: () => [NotificationInstance, React.ReactElement];
 }
 
-/** @private test Only function. Not work on production */
+/** @internal test Only function. Not work on production */
 export const getInstance = async (cacheKey: string) =>
   process.env.NODE_ENV === 'test' ? notificationInstance[cacheKey] : null;
 

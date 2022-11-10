@@ -13,31 +13,48 @@ title:
 
 Search the options with sorting.
 
-```jsx
+```tsx
 import { Select } from 'antd';
+import React from 'react';
 
-const { Option } = Select;
-
-ReactDOM.render(
+const App: React.FC = () => (
   <Select
     showSearch
     style={{ width: 200 }}
     placeholder="Search to Select"
     optionFilterProp="children"
-    filterOption={(input, option) =>
-      option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-    }
+    filterOption={(input, option) => (option?.label ?? '').includes(input)}
     filterSort={(optionA, optionB) =>
-      optionA.children.toLowerCase().localeCompare(optionB.children.toLowerCase())
+      (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
     }
-  >
-    <Option value="1">Not Identified</Option>
-    <Option value="2">Closed</Option>
-    <Option value="3">Communicated</Option>
-    <Option value="4">Identified</Option>
-    <Option value="5">Resolved</Option>
-    <Option value="6">Cancelled</Option>
-  </Select>,
-  mountNode,
+    options={[
+      {
+        value: '1',
+        label: 'Not Identified',
+      },
+      {
+        value: '2',
+        label: 'Closed',
+      },
+      {
+        value: '3',
+        label: 'Communicated',
+      },
+      {
+        value: '4',
+        label: 'Identified',
+      },
+      {
+        value: '5',
+        label: 'Resolved',
+      },
+      {
+        value: '6',
+        label: 'Cancelled',
+      },
+    ]}
+  />
 );
+
+export default App;
 ```

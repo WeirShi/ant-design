@@ -1,25 +1,57 @@
-import * as React from 'react';
 import classNames from 'classnames';
+import * as React from 'react';
 import { ConfigContext } from '../config-provider';
-import RowContext from './RowContext';
-import { tuple } from '../_util/type';
-import ResponsiveObserve, {
-  Breakpoint,
-  ScreenMap,
-  responsiveArray,
-} from '../_util/responsiveObserve';
 import useFlexGapSupport from '../_util/hooks/useFlexGapSupport';
+import type { Breakpoint, ScreenMap } from '../_util/responsiveObserve';
+import ResponsiveObserve, { responsiveArray } from '../_util/responsiveObserve';
+import { tuple } from '../_util/type';
+import RowContext from './RowContext';
 
 const RowAligns = tuple('top', 'middle', 'bottom', 'stretch');
-const RowJustify = tuple('start', 'end', 'center', 'space-around', 'space-between');
+const RowJustify = tuple('start', 'end', 'center', 'space-around', 'space-between', 'space-evenly');
 
-export type Gutter = number | Partial<Record<Breakpoint, number>>;
+type Responsive = 'xxl' | 'xl' | 'lg' | 'md' | 'sm' | 'xs';
+type ResponsiveLike<T> = {
+  [key in Responsive]?: T;
+};
+
+type Gap = number | undefined;
+export type Gutter = number | undefined | Partial<Record<Breakpoint, number>>;
+
+type ResponsiveAligns = ResponsiveLike<typeof RowAligns[number]>;
+type ResponsiveJustify = ResponsiveLike<typeof RowJustify[number]>;
 export interface RowProps extends React.HTMLAttributes<HTMLDivElement> {
   gutter?: Gutter | [Gutter, Gutter];
-  align?: typeof RowAligns[number];
-  justify?: typeof RowJustify[number];
+  align?: typeof RowAligns[number] | ResponsiveAligns;
+  justify?: typeof RowJustify[number] | ResponsiveJustify;
   prefixCls?: string;
   wrap?: boolean;
+}
+
+function useMergePropByScreen(oriProp: RowProps['align'] | RowProps['justify'], screen: ScreenMap) {
+  const [prop, setProp] = React.useState(typeof oriProp === 'string' ? oriProp : '');
+
+  const clacMergeAlignOrJustify = () => {
+    if (typeof oriProp !== 'object') {
+      return;
+    }
+    for (let i = 0; i < responsiveArray.length; i++) {
+      const breakpoint: Breakpoint = responsiveArray[i];
+      // if do not match, do nothing
+      if (!screen[breakpoint]) continue;
+      const curVal = oriProp[breakpoint];
+      if (curVal !== undefined) {
+        setProp(curVal);
+        return;
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    clacMergeAlignOrJustify();
+  }, [JSON.stringify(oriProp), screen]);
+
+  return prop;
 }
 
 const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
@@ -45,6 +77,20 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
     xl: true,
     xxl: true,
   });
+  // to save screens info when responsiveObserve callback had been call
+  const [curScreens, setCurScreens] = React.useState<ScreenMap>({
+    xs: false,
+    sm: false,
+    md: false,
+    lg: false,
+    xl: false,
+    xxl: false,
+  });
+
+  // ================================== calc reponsive data ==================================
+  const mergeAlign = useMergePropByScreen(align, curScreens);
+
+  const mergeJustify = useMergePropByScreen(justify, curScreens);
 
   const supportFlexGap = useFlexGapSupport();
 
@@ -53,6 +99,7 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
   // ================================== Effect ==================================
   React.useEffect(() => {
     const token = ResponsiveObserve.subscribe(screen => {
+      setCurScreens(screen);
       const currentGutter = gutterRef.current || 0;
       if (
         (!Array.isArray(currentGutter) && typeof currentGutter === 'object') ||
@@ -66,9 +113,9 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
   }, []);
 
   // ================================== Render ==================================
-  const getGutter = (): [number, number] => {
-    const results: [number, number] = [0, 0];
-    const normalizedGutter = Array.isArray(gutter) ? gutter : [gutter, 0];
+  const getGutter = (): [Gap, Gap] => {
+    const results: [Gap, Gap] = [undefined, undefined];
+    const normalizedGutter = Array.isArray(gutter) ? gutter : [gutter, undefined];
     normalizedGutter.forEach((g, index) => {
       if (typeof g === 'object') {
         for (let i = 0; i < responsiveArray.length; i++) {
@@ -79,7 +126,7 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
           }
         }
       } else {
-        results[index] = g || 0;
+        results[index] = g;
       }
     });
     return results;
@@ -91,8 +138,8 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
     prefixCls,
     {
       [`${prefixCls}-no-wrap`]: wrap === false,
-      [`${prefixCls}-${justify}`]: justify,
-      [`${prefixCls}-${align}`]: align,
+      [`${prefixCls}-${mergeJustify}`]: mergeJustify,
+      [`${prefixCls}-${mergeAlign}`]: mergeAlign,
       [`${prefixCls}-rtl`]: direction === 'rtl',
     },
     className,
@@ -100,8 +147,8 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
 
   // Add gutter related style
   const rowStyle: React.CSSProperties = {};
-  const horizontalGutter = gutters[0] > 0 ? gutters[0] / -2 : undefined;
-  const verticalGutter = gutters[1] > 0 ? gutters[1] / -2 : undefined;
+  const horizontalGutter = gutters[0] != null && gutters[0] > 0 ? gutters[0] / -2 : undefined;
+  const verticalGutter = gutters[1] != null && gutters[1] > 0 ? gutters[1] / -2 : undefined;
 
   if (horizontalGutter) {
     rowStyle.marginLeft = horizontalGutter;
@@ -133,6 +180,8 @@ const Row = React.forwardRef<HTMLDivElement, RowProps>((props, ref) => {
   );
 });
 
-Row.displayName = 'Row';
+if (process.env.NODE_ENV !== 'production') {
+  Row.displayName = 'Row';
+}
 
 export default Row;

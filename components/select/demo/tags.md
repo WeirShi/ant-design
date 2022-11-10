@@ -13,24 +13,33 @@ tags select，随意输入的内容（scroll the menu）。
 
 Select with tags, transform input to tag (scroll the menu).
 
-```jsx
+```tsx
 import { Select } from 'antd';
+import React from 'react';
+import type { SelectProps } from 'antd';
 
-const { Option } = Select;
+const options: SelectProps['options'] = [];
 
-const children = [];
 for (let i = 10; i < 36; i++) {
-  children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
+  options.push({
+    value: i.toString(36) + i,
+    label: i.toString(36) + i,
+  });
 }
 
-function handleChange(value) {
+const handleChange = (value: string) => {
   console.log(`selected ${value}`);
-}
+};
 
-ReactDOM.render(
-  <Select mode="tags" style={{ width: '100%' }} placeholder="Tags Mode" onChange={handleChange}>
-    {children}
-  </Select>,
-  mountNode,
+const App: React.FC = () => (
+  <Select
+    mode="tags"
+    style={{ width: '100%' }}
+    placeholder="Tags Mode"
+    onChange={handleChange}
+    options={options}
+  />
 );
+
+export default App;
 ```

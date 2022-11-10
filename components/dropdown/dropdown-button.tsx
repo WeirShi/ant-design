@@ -1,19 +1,22 @@
-import * as React from 'react';
-import classNames from 'classnames';
 import EllipsisOutlined from '@ant-design/icons/EllipsisOutlined';
-import Button, { ButtonProps } from '../button';
-import { ButtonHTMLType } from '../button/button';
-import { ButtonGroupProps } from '../button/button-group';
+import classNames from 'classnames';
+import * as React from 'react';
+import type { ButtonProps } from '../button';
+import Button from '../button';
+import type { ButtonHTMLType } from '../button/button';
+import type { ButtonGroupProps } from '../button/button-group';
 import { ConfigContext } from '../config-provider';
-import Dropdown, { DropDownProps } from './dropdown';
-
-const ButtonGroup = Button.Group;
+import { useCompactItemContext } from '../space/Compact';
+import type { DropdownProps } from './dropdown';
+import Dropdown from './dropdown';
+import Space from '../space';
 
 export type DropdownButtonType = 'default' | 'primary' | 'ghost' | 'dashed' | 'link' | 'text';
 
-export interface DropdownButtonProps extends ButtonGroupProps, DropDownProps {
+export interface DropdownButtonProps extends ButtonGroupProps, DropdownProps {
   type?: DropdownButtonType;
   htmlType?: ButtonHTMLType;
+  danger?: boolean;
   disabled?: boolean;
   loading?: ButtonProps['loading'];
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
@@ -25,6 +28,7 @@ export interface DropdownButtonProps extends ButtonGroupProps, DropDownProps {
 }
 
 interface DropdownButtonInterface extends React.FC<DropdownButtonProps> {
+  /** @internal */
   __ANT_BUTTON: boolean;
 }
 
@@ -38,17 +42,23 @@ const DropdownButton: DropdownButtonInterface = props => {
   const {
     prefixCls: customizePrefixCls,
     type = 'default',
+    danger,
     disabled,
     loading,
     onClick,
     htmlType,
     children,
     className,
+    menu,
+    arrow,
+    autoFocus,
     overlay,
     trigger,
     align,
     visible,
+    open,
     onVisibleChange,
+    onOpenChange,
     placement,
     getPopupContainer,
     href,
@@ -64,22 +74,34 @@ const DropdownButton: DropdownButtonInterface = props => {
   } = props;
 
   const prefixCls = getPrefixCls('dropdown-button', customizePrefixCls);
-  const dropdownProps = {
+  const dropdownProps: DropdownProps = {
+    menu,
+    arrow,
+    autoFocus,
     align,
-    overlay,
     disabled,
     trigger: disabled ? [] : trigger,
-    onVisibleChange,
+    onOpenChange: onOpenChange || onVisibleChange,
     getPopupContainer: getPopupContainer || getContextPopupContainer,
     mouseEnterDelay,
     mouseLeaveDelay,
     overlayClassName,
     overlayStyle,
     destroyPopupOnHide,
-  } as DropDownProps;
+  };
 
-  if ('visible' in props) {
-    dropdownProps.visible = visible;
+  const { compactSize, compactItemClassnames } = useCompactItemContext(prefixCls, direction);
+
+  const classes = classNames(prefixCls, compactItemClassnames, className);
+
+  if ('overlay' in props) {
+    dropdownProps.overlay = overlay;
+  }
+
+  if ('open' in props) {
+    dropdownProps.open = open;
+  } else if ('visible' in props) {
+    dropdownProps.open = visible;
   }
 
   if ('placement' in props) {
@@ -91,6 +113,7 @@ const DropdownButton: DropdownButtonInterface = props => {
   const leftButton = (
     <Button
       type={type}
+      danger={danger}
       disabled={disabled}
       loading={loading}
       onClick={onClick}
@@ -102,15 +125,15 @@ const DropdownButton: DropdownButtonInterface = props => {
     </Button>
   );
 
-  const rightButton = <Button type={type} icon={icon} />;
+  const rightButton = <Button type={type} danger={danger} icon={icon} />;
 
-  const [leftButtonToRender, rightButtonToRender] = buttonsRender!([leftButton, rightButton]);
+  const [leftButtonToRender, rightButtonToRender] = buttonsRender([leftButton, rightButton]);
 
   return (
-    <ButtonGroup {...restProps} className={classNames(prefixCls, className)}>
+    <Space.Compact className={classes} size={compactSize} block {...restProps}>
       {leftButtonToRender}
       <Dropdown {...dropdownProps}>{rightButtonToRender}</Dropdown>
-    </ButtonGroup>
+    </Space.Compact>
   );
 };
 

@@ -1,5 +1,5 @@
 ---
-order: 2
+order: 3
 title:
   zh-CN: 其他元素
   en-US: Other elements
@@ -13,35 +13,49 @@ title:
 
 Divider and disabled menu item.
 
-```jsx
-import { Menu, Dropdown } from 'antd';
+```tsx
 import { DownOutlined } from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Dropdown, Space } from 'antd';
+import React from 'react';
 
-const menu = (
-  <Menu>
-    <Menu.Item key="0">
+const items: MenuProps['items'] = [
+  {
+    label: (
       <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
         1st menu item
       </a>
-    </Menu.Item>
-    <Menu.Item key="1">
+    ),
+    key: '0',
+  },
+  {
+    label: (
       <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
         2nd menu item
       </a>
-    </Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="3" disabled>
-      3rd menu item（disabled）
-    </Menu.Item>
-  </Menu>
+    ),
+    key: '1',
+  },
+  {
+    type: 'divider',
+  },
+  {
+    label: '3rd menu item（disabled）',
+    key: '3',
+    disabled: true,
+  },
+];
+
+const App: React.FC = () => (
+  <Dropdown menu={{ items }}>
+    <a onClick={e => e.preventDefault()}>
+      <Space>
+        Hover me
+        <DownOutlined />
+      </Space>
+    </a>
+  </Dropdown>
 );
 
-ReactDOM.render(
-  <Dropdown overlay={menu}>
-    <a className="ant-dropdown-link" onClick={e => e.preventDefault()}>
-      Hover me <DownOutlined />
-    </a>
-  </Dropdown>,
-  mountNode,
-);
+export default App;
 ```

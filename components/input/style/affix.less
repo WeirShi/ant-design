@@ -28,13 +28,17 @@
       }
     }
 
-    > input.@{ant-prefix}-input {
-      padding: 0;
+    > .@{ant-prefix}-input {
+      font-size: inherit;
       border: none;
       outline: none;
 
       &:focus {
         box-shadow: none !important;
+      }
+
+      &:not(textarea) {
+        padding: 0;
       }
     }
 
@@ -50,6 +54,10 @@
     display: flex;
     flex: none;
     align-items: center;
+
+    > *:not(:last-child) {
+      margin-right: 8px;
+    }
   }
 
   &-show-count-suffix {

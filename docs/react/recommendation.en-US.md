@@ -16,7 +16,7 @@ title: Third-Party Libraries
 | Code Editor | [react-codemirror2](https://github.com/scniro/react-codemirror2) [react-monaco-editor](https://github.com/superRaytin/react-monaco-editor) |
 | Rich Text Editor | [react-quill](https://github.com/zenoamaro/react-quill) [braft-editor](https://github.com/margox/braft-editor) |
 | JSON Viewer | [react-json-view](https://github.com/mac-s-g/react-json-view) |
-| Color Picker | [react-color](http://casesandberg.github.io/react-color/) |
+| Color Picker | [react-colorful](https://github.com/omgovich/react-colorful) [react-color](http://casesandberg.github.io/react-color/) |
 | Media Query | [react-responsive](https://github.com/contra/react-responsive) [react-media](https://github.com/ReactTraining/react-media) |
 | Copy to clipboard | [react-copy-to-clipboard](https://github.com/nkbt/react-copy-to-clipboard) |
 | Document head manager | [react-helmet](https://github.com/nfl/react-helmet) [react-helmet-async](https://github.com/staylor/react-helmet-async) |
@@ -29,7 +29,7 @@ title: Third-Party Libraries
 | Infinite Scroll | [rc-virtual-list](https://github.com/react-component/virtual-list/) [react-infinite-scroll-component](https://github.com/ankeetmaini/react-infinite-scroll-component) |
 | Map | [react-google-maps](https://github.com/tomchentw/react-google-maps) [google-map-react](https://github.com/istarkov/google-map-react) [react-amap](https://github.com/ElemeFE/react-amap) |
 | Video | [react-player](https://github.com/CookPete/react-player) [video-react](https://github.com/video-react/video-react) [video.js](http://docs.videojs.com/tutorial-react.html) |
-| Context Menu | [react-contextmenu](https://github.com/vkbansal/react-contextmenu/) [react-contexify](https://github.com/fkhadra/react-contexify) |
+| Context Menu | [react-contexify](https://github.com/fkhadra/react-contexify) |
 | Emoji | [emoji-mart](https://github.com/missive/emoji-mart) |
 | Split View | [react-split-pane](https://github.com/tomkp/react-split-pane) |
 | Image Crop | [antd-img-crop](https://github.com/nanxiaobei/antd-img-crop) [react-image-crop](https://github.com/DominicTobias/react-image-crop) |
@@ -39,6 +39,8 @@ title: Third-Party Libraries
 | Animation | [react-move](https://github.com/react-tools/react-move) [Ant Motion](https://motion.ant.design/components/tween-one) [react-spring](https://www.react-spring.io) |
 | Page Footer | [rc-footer](https://github.com/react-component/footer) |
 | Water Mark | [WaterMark](https://procomponents.ant.design/components/water-mark) |
+| Currency | [react-number-format](https://github.com/s-yadav/react-number-format) [react-currency-input-fiel](https://github.com/cchanxzy/react-currency-input-field) |
+| Application Frameworks | [umi](https://github.com/umijs/umi/) [remix](https://github.com/remix-run/remix) [refine](https://github.com/pankod/refine) |
 
 ## Products we are using ✨
 

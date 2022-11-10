@@ -13,17 +13,27 @@ title:
 
 By setting like this: `<Steps size="small">`, you can get a mini version.
 
-```jsx
+```tsx
 import { Steps } from 'antd';
+import React from 'react';
 
-const { Step } = Steps;
-
-ReactDOM.render(
-  <Steps size="small" current={1}>
-    <Step title="Finished" />
-    <Step title="In Progress" />
-    <Step title="Waiting" />
-  </Steps>,
-  mountNode,
+const App: React.FC = () => (
+  <Steps
+    size="small"
+    current={1}
+    items={[
+      {
+        title: 'Finished',
+      },
+      {
+        title: 'In Progress',
+      },
+      {
+        title: 'Waiting',
+      },
+    ]}
+  />
 );
+
+export default App;
 ```

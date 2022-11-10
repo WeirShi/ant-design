@@ -1,19 +1,8 @@
 import React from 'react';
-import { mount } from 'enzyme';
 import Anchor from '..';
-import { sleep } from '../../../tests/utils';
+import { fireEvent, render, waitFakeTimer } from '../../../tests/utils';
 
 const { Link } = Anchor;
-
-function createGetContainer(id: string) {
-  return () => {
-    const container = document.getElementById(id);
-    if (container == null) {
-      throw new Error();
-    }
-    return container;
-  };
-}
 
 function createDiv() {
   const root = document.createElement('div');
@@ -32,6 +21,7 @@ describe('Anchor Render', () => {
   const getClientRectsMock = jest.spyOn(HTMLHeadingElement.prototype, 'getClientRects');
 
   beforeAll(() => {
+    jest.useFakeTimers();
     getBoundingClientRectMock.mockReturnValue({
       width: 100,
       height: 100,
@@ -40,132 +30,195 @@ describe('Anchor Render', () => {
     getClientRectsMock.mockReturnValue({ length: 1 } as DOMRectList);
   });
 
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
   afterAll(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
     getBoundingClientRectMock.mockRestore();
     getClientRectsMock.mockRestore();
   });
 
-  it('Anchor render perfectly', () => {
+  it('renders correctly', () => {
     const hash = getHashUrl();
-    const wrapper = mount<Anchor>(
+    const { container } = render(
       <Anchor>
         <Link href={`#${hash}`} title={hash} />
       </Anchor>,
     );
-
-    wrapper.find(`a[href="#${hash}"]`).simulate('click');
-
-    wrapper.instance().handleScroll();
-    expect(wrapper.instance().state).not.toBe(null);
+    expect(container.querySelector(`a[href="#${hash}"]`)).not.toBe(null);
   });
 
-  it('Anchor render perfectly for complete href - click', () => {
+  it('actives the target when clicking a link', async () => {
     const hash = getHashUrl();
-    const wrapper = mount<Anchor>(
-      <Anchor>
+    const { container } = render(
+      <Anchor prefixCls="ant-anchor">
         <Link href={`http://www.example.com/#${hash}`} title={hash} />
       </Anchor>,
     );
-    wrapper.find(`a[href="http://www.example.com/#${hash}"]`).simulate('click');
-    expect(wrapper.instance().state.activeLink).toBe(`http://www.example.com/#${hash}`);
+    const link = container.querySelector(`a[href="http://www.example.com/#${hash}"]`)!;
+    fireEvent.click(link);
+    await waitFakeTimer();
+    expect(link.classList).toContain('ant-anchor-link-title-active');
   });
 
-  it('Anchor render perfectly for complete href - hash router', async () => {
+  it('scrolls the page when clicking a link', async () => {
     const root = createDiv();
     const scrollToSpy = jest.spyOn(window, 'scrollTo');
-    mount(<div id="/faq?locale=en#Q1">Q1</div>, { attachTo: root });
-    const wrapper = mount<Anchor>(
+    render(<div id="/faq?locale=en#Q1">Q1</div>, { container: root });
+    const { container } = render(
       <Anchor>
         <Link href="/#/faq?locale=en#Q1" title="Q1" />
       </Anchor>,
     );
-
-    wrapper.instance().handleScrollTo('/#/faq?locale=en#Q1');
-    expect(wrapper.instance().state.activeLink).toBe('/#/faq?locale=en#Q1');
-    expect(scrollToSpy).not.toHaveBeenCalled();
-    await sleep(1000);
+    const link = container.querySelector(`a[href="/#/faq?locale=en#Q1"]`)!;
+    fireEvent.click(link);
+    await waitFakeTimer();
     expect(scrollToSpy).toHaveBeenCalled();
   });
 
-  it('Anchor render perfectly for complete href - scroll', () => {
-    const hash = getHashUrl();
+  it('handleScroll should not be triggered when scrolling caused by clicking a link', async () => {
+    const hash1 = getHashUrl();
+    const hash2 = getHashUrl();
     const root = createDiv();
-    mount(<div id={hash}>Hello</div>, { attachTo: root });
-    const wrapper = mount<Anchor>(
-      <Anchor>
-        <Link href={`http://www.example.com/#${hash}`} title={hash} />
+    const onChange = jest.fn();
+    render(
+      <div>
+        <div id={hash1}>Hello</div>
+        <div id={hash2}>World</div>
+      </div>,
+      { container: root },
+    );
+    const { container } = render(
+      <Anchor onChange={onChange}>
+        <Link href={`#${hash1}`} title={hash1} />
+        <Link href={`#${hash2}`} title={hash2} />
       </Anchor>,
     );
-    wrapper.instance().handleScroll();
-    expect(wrapper.instance().state.activeLink).toBe(`http://www.example.com/#${hash}`);
+    onChange.mockClear();
+
+    const link = container.querySelector(`a[href="#${hash2}"]`)!;
+    // this will trigger 1 onChange
+    fireEvent.click(link);
+    // smooth scroll caused by clicking needs time to finish.
+    // we scroll the window before it finish, the scroll listener should not be triggered,
+    fireEvent.scroll(window);
+
+    await waitFakeTimer();
+    // if the scroll listener is triggered, we will get 2 onChange, now we expect only 1.
+    expect(onChange).toHaveBeenCalledTimes(1);
   });
 
-  it('Anchor render perfectly for complete href - scrollTo', async () => {
+  it('should update DOM when children are unmounted', () => {
     const hash = getHashUrl();
-    const scrollToSpy = jest.spyOn(window, 'scrollTo');
-    const root = createDiv();
-    mount(<div id={`#${hash}`}>Hello</div>, { attachTo: root });
-    const wrapper = mount<Anchor>(
-      <Anchor>
-        <Link href={`##${hash}`} title={hash} />
-      </Anchor>,
-    );
-    wrapper.instance().handleScrollTo(`##${hash}`);
-    expect(wrapper.instance().state.activeLink).toBe(`##${hash}`);
-    const calls = scrollToSpy.mock.calls.length;
-    await sleep(1000);
-    expect(scrollToSpy.mock.calls.length).toBeGreaterThan(calls);
-  });
-
-  it('should remove listener when unmount', async () => {
-    const hash = getHashUrl();
-    const wrapper = mount<Anchor>(
+    const { container, rerender } = render(
       <Anchor>
         <Link href={`#${hash}`} title={hash} />
       </Anchor>,
     );
-    const removeListenerSpy = jest.spyOn((wrapper.instance() as any).scrollEvent, 'remove');
-    wrapper.unmount();
-    expect(removeListenerSpy).toHaveBeenCalled();
+
+    expect(container.querySelectorAll('.ant-anchor-link-title')).toHaveLength(1);
+    expect(container.querySelector('.ant-anchor-link-title')).toHaveAttribute('href', `#${hash}`);
+
+    rerender(<Anchor />);
+    expect(container.querySelector('.ant-anchor-link-title')).toBeFalsy();
   });
 
-  it('should unregister link when unmount children', async () => {
+  it('should update DOM when link href is changed', async () => {
     const hash = getHashUrl();
-    const wrapper = mount<Anchor>(
-      <Anchor>
-        <Link href={`#${hash}`} title={hash} />
-      </Anchor>,
-    );
-    expect((wrapper.instance() as any).links).toEqual([`#${hash}`]);
-    wrapper.setProps({ children: null });
-    expect((wrapper.instance() as any).links).toEqual([]);
-  });
-
-  it('should update links when link href update', async () => {
-    const hash = getHashUrl();
-    let anchorInstance: Anchor | null = null;
     function AnchorUpdate({ href }: { href: string }) {
       return (
-        <Anchor
-          ref={c => {
-            anchorInstance = c;
-          }}
-        >
+        <Anchor>
           <Link href={href} title={hash} />
         </Anchor>
       );
     }
-    const wrapper = mount(<AnchorUpdate href={`#${hash}`} />);
+    const { container, rerender } = render(<AnchorUpdate href={`#${hash}`} />);
 
-    if (anchorInstance == null) {
-      throw new Error('anchorInstance should not be null');
-    }
-    expect((anchorInstance as any).links).toEqual([`#${hash}`]);
-    wrapper.setProps({ href: `#${hash}_1` });
-    expect((anchorInstance as any).links).toEqual([`#${hash}_1`]);
+    expect(container.querySelector(`a[href="#${hash}"]`)).toBeTruthy();
+    rerender(<AnchorUpdate href={`#${hash}_1`} />);
+    expect(container.querySelector(`a[href="#${hash}_1"]`)).toBeTruthy();
   });
 
-  it('Anchor onClick event', () => {
+  it('targetOffset prop', async () => {
+    const hash = getHashUrl();
+
+    const scrollToSpy = jest.spyOn(window, 'scrollTo');
+    const root = createDiv();
+    render(<h1 id={hash}>Hello</h1>, { container: root });
+    const { container, rerender } = render(
+      <Anchor>
+        <Link href={`#${hash}`} title={hash} />
+      </Anchor>,
+    );
+
+    const setProps = (props: Record<string, any>) =>
+      rerender(
+        <Anchor {...props}>
+          <Link href={`#${hash}`} title={hash} />
+        </Anchor>,
+      );
+
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
+    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 1000);
+
+    setProps({ offsetTop: 100 });
+
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
+    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 900);
+
+    setProps({ targetOffset: 200 });
+
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
+    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
+  });
+
+  // https://github.com/ant-design/ant-design/issues/31941
+  it('targetOffset prop when contain spaces', async () => {
+    const hash = `${getHashUrl()} s p a c e s`;
+
+    const scrollToSpy = jest.spyOn(window, 'scrollTo');
+    const root = createDiv();
+    render(<h1 id={hash}>Hello</h1>, { container: root });
+    const { container, rerender } = render(
+      <Anchor>
+        <Link href={`#${hash}`} title={hash} />
+      </Anchor>,
+    );
+
+    const setProps = (props: Record<string, any>) =>
+      rerender(
+        <Anchor {...props}>
+          <Link href={`#${hash}`} title={hash} />
+        </Anchor>,
+      );
+
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
+    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 1000);
+
+    setProps({ offsetTop: 100 });
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
+    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 900);
+
+    setProps({ targetOffset: 200 });
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
+    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
+  });
+
+  it('onClick event', () => {
     const hash = getHashUrl();
     let event;
     let link;
@@ -179,308 +232,83 @@ describe('Anchor Render', () => {
 
     const href = `#${hash}`;
     const title = hash;
-
-    const wrapper = mount<Anchor>(
+    const { container } = render(
       <Anchor onClick={handleClick}>
         <Link href={href} title={title} />
       </Anchor>,
     );
 
-    wrapper.find(`a[href="${href}"]`).simulate('click');
-
-    wrapper.instance().handleScroll();
+    fireEvent.click(container.querySelector(`a[href="${href}"]`)!);
     expect(event).not.toBe(undefined);
     expect(link).toEqual({ href, title });
   });
 
-  it('Different function returns the same DOM', async () => {
-    const hash = getHashUrl();
-    const root = createDiv();
-    mount(<div id={hash}>Hello</div>, { attachTo: root });
-    const getContainerA = createGetContainer(hash);
-    const getContainerB = createGetContainer(hash);
-
-    const wrapper = mount<Anchor>(
-      <Anchor getContainer={getContainerA}>
-        <Link href={`#${hash}`} title={hash} />
-      </Anchor>,
-    );
-    const removeListenerSpy = jest.spyOn((wrapper.instance() as any).scrollEvent, 'remove');
-    await sleep(1000);
-    wrapper.setProps({ getContainer: getContainerB });
-    expect(removeListenerSpy).not.toHaveBeenCalled();
-  });
-
-  it('Different function returns different DOM', async () => {
-    const hash1 = getHashUrl();
-    const hash2 = getHashUrl();
-    const root = createDiv();
-    mount(
-      <div>
-        <div id={hash1}>Hello</div>
-        <div id={hash2}>World</div>
-      </div>,
-      { attachTo: root },
-    );
-    const getContainerA = createGetContainer(hash1);
-    const getContainerB = createGetContainer(hash2);
-    const wrapper = mount<Anchor>(
-      <Anchor getContainer={getContainerA}>
-        <Link href={`#${hash1}`} title={hash1} />
-        <Link href={`#${hash2}`} title={hash2} />
-      </Anchor>,
-    );
-    const removeListenerSpy = jest.spyOn((wrapper.instance() as any).scrollEvent, 'remove');
-    expect(removeListenerSpy).not.toHaveBeenCalled();
-    await sleep(1000);
-    wrapper.setProps({ getContainer: getContainerB });
-    expect(removeListenerSpy).toHaveBeenCalled();
-  });
-
-  it('Same function returns the same DOM', () => {
-    const hash = getHashUrl();
-    const root = createDiv();
-    mount(<div id={hash}>Hello</div>, { attachTo: root });
-    const getContainer = createGetContainer(hash);
-    const wrapper = mount(
-      <Anchor getContainer={getContainer}>
-        <Link href={`#${hash}`} title={hash} />
-      </Anchor>,
-    );
-    wrapper.find(`a[href="#${hash}"]`).simulate('click');
-    (wrapper.instance() as any).handleScroll();
-    expect(wrapper.instance().state).not.toBe(null);
-  });
-
-  it('Same function returns different DOM', async () => {
-    const hash1 = getHashUrl();
-    const hash2 = getHashUrl();
-    const root = createDiv();
-    mount(
-      <div>
-        <div id={hash1}>Hello</div>
-        <div id={hash2}>World</div>
-      </div>,
-      { attachTo: root },
-    );
-    const holdContainer = {
-      container: document.getElementById(hash1),
-    };
-    const getContainer = () => {
-      if (holdContainer.container == null) {
-        throw new Error('container should not be null');
-      }
-      return holdContainer.container;
-    };
-    const wrapper = mount(
-      <Anchor getContainer={getContainer}>
-        <Link href={`#${hash1}`} title={hash1} />
-        <Link href={`#${hash2}`} title={hash2} />
-      </Anchor>,
-    );
-    const removeListenerSpy = jest.spyOn((wrapper.instance() as any).scrollEvent, 'remove');
-    expect(removeListenerSpy).not.toHaveBeenCalled();
-    await sleep(1000);
-    holdContainer.container = document.getElementById(hash2);
-    wrapper.setProps({ 'data-only-trigger-re-render': true });
-    expect(removeListenerSpy).toHaveBeenCalled();
-  });
-
-  it('Anchor getCurrentAnchor prop', () => {
-    const hash1 = getHashUrl();
-    const hash2 = getHashUrl();
-    const getCurrentAnchor = () => `#${hash2}`;
-    const wrapper = mount<Anchor>(
-      <Anchor getCurrentAnchor={getCurrentAnchor}>
-        <Link href={`#${hash1}`} title={hash1} />
-        <Link href={`#${hash2}`} title={hash2} />
-      </Anchor>,
-    );
-    expect(wrapper.instance().state.activeLink).toBe(`#${hash2}`);
-  });
-
-  it('Anchor targetOffset prop', async () => {
-    const hash = getHashUrl();
-    let dateNowMock;
-
-    function dataNowMockFn() {
-      let start = 0;
-
-      const handler = () => {
-        start += 1000;
-        return start;
-      };
-
-      return jest.spyOn(Date, 'now').mockImplementation(handler);
-    }
-
-    dateNowMock = dataNowMockFn();
-
-    const scrollToSpy = jest.spyOn(window, 'scrollTo');
-    const root = createDiv();
-    mount(<h1 id={hash}>Hello</h1>, { attachTo: root });
-    const wrapper = mount<Anchor>(
-      <Anchor>
-        <Link href={`#${hash}`} title={hash} />
-      </Anchor>,
-    );
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
-    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 1000);
-    dateNowMock = dataNowMockFn();
-
-    wrapper.setProps({ offsetTop: 100 });
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
-    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 900);
-    dateNowMock = dataNowMockFn();
-
-    wrapper.setProps({ targetOffset: 200 });
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
-    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
-
-    dateNowMock.mockRestore();
-  });
-
-  // https://github.com/ant-design/ant-design/issues/31941
-  it('Anchor targetOffset prop when contain spaces', async () => {
-    const hash = `${getHashUrl()} s p a c e s`;
-    let dateNowMock;
-
-    function dataNowMockFn() {
-      let start = 0;
-
-      const handler = () => {
-        start += 1000;
-        return start;
-      };
-
-      return jest.spyOn(Date, 'now').mockImplementation(handler);
-    }
-
-    dateNowMock = dataNowMockFn();
-
-    const scrollToSpy = jest.spyOn(window, 'scrollTo');
-    const root = createDiv();
-    mount(<h1 id={hash}>Hello</h1>, { attachTo: root });
-    const wrapper = mount<Anchor>(
-      <Anchor>
-        <Link href={`#${hash}`} title={hash} />
-      </Anchor>,
-    );
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
-    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 1000);
-    dateNowMock = dataNowMockFn();
-
-    wrapper.setProps({ offsetTop: 100 });
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
-    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 900);
-    dateNowMock = dataNowMockFn();
-
-    wrapper.setProps({ targetOffset: 200 });
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
-    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
-
-    dateNowMock.mockRestore();
-  });
-
-  it('Anchor onChange prop', async () => {
+  it('onChange event', () => {
     const hash1 = getHashUrl();
     const hash2 = getHashUrl();
     const onChange = jest.fn();
-    const wrapper = mount<Anchor>(
+    const { container } = render(
       <Anchor onChange={onChange}>
         <Link href={`#${hash1}`} title={hash1} />
         <Link href={`#${hash2}`} title={hash2} />
       </Anchor>,
+      // https://github.com/testing-library/react-testing-library/releases/tag/v13.0.0
+      // @ts-ignore
+      { legacyRoot: true },
     );
+
     expect(onChange).toHaveBeenCalledTimes(1);
-    wrapper.instance().handleScrollTo(hash2);
+    fireEvent.click(container.querySelector(`a[href="#${hash2}"]`)!);
     expect(onChange).toHaveBeenCalledTimes(2);
-    expect(onChange).toHaveBeenCalledWith(hash2);
+    expect(onChange).toHaveBeenLastCalledWith(`#${hash2}`);
   });
 
-  // https://github.com/ant-design/ant-design/issues/30584
-  it('should trigger onChange when have getCurrentAnchor', async () => {
-    const hash1 = getHashUrl();
-    const hash2 = getHashUrl();
-    const onChange = jest.fn();
-    const wrapper = mount<Anchor>(
-      <Anchor onChange={onChange} getCurrentAnchor={() => hash1}>
-        <Link href={`#${hash1}`} title={hash1} />
-        <Link href={`#${hash2}`} title={hash2} />
-      </Anchor>,
-    );
-    expect(onChange).toHaveBeenCalledTimes(1);
-    wrapper.instance().handleScrollTo(hash2);
-    expect(onChange).toHaveBeenCalledTimes(2);
-    expect(onChange).toHaveBeenCalledWith(hash2);
-  });
-
-  it('invalid hash', async () => {
-    const wrapper = mount<Anchor>(
+  it('handles invalid hash correctly', () => {
+    const { container } = render(
       <Anchor>
         <Link href="notexsited" title="title" />
       </Anchor>,
     );
 
-    wrapper.find(`a[href="notexsited"]`).simulate('click');
-
-    wrapper.instance().handleScrollTo('notexsited');
-    expect(wrapper.instance().state).not.toBe(null);
+    const link = container.querySelector(`a[href="notexsited"]`)!;
+    fireEvent.click(link);
+    expect(container.querySelector(`.ant-anchor-link-title-active`)?.textContent).toBe('title');
   });
 
   it('test edge case when getBoundingClientRect return zero size', async () => {
-    getBoundingClientRectMock.mockReturnValue({
-      width: 0,
-      height: 0,
-      top: 1000,
-    } as DOMRect);
+    getBoundingClientRectMock.mockReturnValue({ width: 0, height: 0, top: 1000 } as DOMRect);
     const hash = getHashUrl();
-    let dateNowMock;
-
-    function dataNowMockFn() {
-      let start = 0;
-
-      const handler = () => {
-        start += 1000;
-        return start;
-      };
-
-      return jest.spyOn(Date, 'now').mockImplementation(handler);
-    }
-
-    dateNowMock = dataNowMockFn();
 
     const scrollToSpy = jest.spyOn(window, 'scrollTo');
     const root = createDiv();
-    mount(<h1 id={hash}>Hello</h1>, { attachTo: root });
-    const wrapper = mount<Anchor>(
+    render(<h1 id={hash}>Hello</h1>, { container: root });
+    const { container, rerender } = render(
       <Anchor>
         <Link href={`#${hash}`} title={hash} />
       </Anchor>,
     );
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
+
+    const setProps = (props: Record<string, any>) =>
+      rerender(
+        <Anchor {...props}>
+          <Link href={`#${hash}`} title={hash} />
+        </Anchor>,
+      );
+
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
     expect(scrollToSpy).toHaveBeenLastCalledWith(0, 1000);
-    dateNowMock = dataNowMockFn();
 
-    wrapper.setProps({ offsetTop: 100 });
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
+    setProps({ offsetTop: 100 });
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
     expect(scrollToSpy).toHaveBeenLastCalledWith(0, 900);
-    dateNowMock = dataNowMockFn();
 
-    wrapper.setProps({ targetOffset: 200 });
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
+    setProps({ targetOffset: 200 });
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
     expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
 
-    dateNowMock.mockRestore();
     getBoundingClientRectMock.mockReturnValue({
       width: 100,
       height: 100,
@@ -490,45 +318,118 @@ describe('Anchor Render', () => {
 
   it('test edge case when container is not windows', async () => {
     const hash = getHashUrl();
-    let dateNowMock;
-
-    function dataNowMockFn() {
-      let start = 0;
-
-      const handler = () => {
-        start += 1000;
-        return start;
-      };
-
-      return jest.spyOn(Date, 'now').mockImplementation(handler);
-    }
-
-    dateNowMock = dataNowMockFn();
 
     const scrollToSpy = jest.spyOn(window, 'scrollTo');
     const root = createDiv();
-    mount(<h1 id={hash}>Hello</h1>, { attachTo: root });
-    const wrapper = mount<Anchor>(
+    render(<h1 id={hash}>Hello</h1>, { container: root });
+
+    const { container, rerender } = render(
       <Anchor getContainer={() => document.body}>
         <Link href={`#${hash}`} title={hash} />
       </Anchor>,
     );
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
-    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
-    dateNowMock = dataNowMockFn();
 
-    wrapper.setProps({ offsetTop: 100 });
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
-    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
-    dateNowMock = dataNowMockFn();
+    const setProps = (props: Record<string, any>) =>
+      rerender(
+        <Anchor getContainer={() => document.body} {...props}>
+          <Link href={`#${hash}`} title={hash} />
+        </Anchor>,
+      );
 
-    wrapper.setProps({ targetOffset: 200 });
-    wrapper.instance().handleScrollTo(`#${hash}`);
-    await sleep(30);
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
     expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
 
-    dateNowMock.mockRestore();
+    setProps({ offsetTop: 100 });
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
+    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
+
+    setProps({ targetOffset: 200 });
+    fireEvent.click(container.querySelector(`a[href="#${hash}"]`)!);
+    await waitFakeTimer();
+    expect(scrollToSpy).toHaveBeenLastCalledWith(0, 800);
+  });
+
+  describe('getCurrentAnchor', () => {
+    it('getCurrentAnchor prop', () => {
+      const hash1 = getHashUrl();
+      const hash2 = getHashUrl();
+      const getCurrentAnchor = () => `#${hash2}`;
+      const { container } = render(
+        <Anchor getCurrentAnchor={getCurrentAnchor}>
+          <Link href={`#${hash1}`} title={hash1} />
+          <Link href={`#${hash2}`} title={hash2} />
+        </Anchor>,
+      );
+
+      expect(container.querySelector(`.ant-anchor-link-title-active`)?.textContent).toBe(hash2);
+    });
+
+    // https://github.com/ant-design/ant-design/issues/30584
+    it('should trigger onChange when have getCurrentAnchor', () => {
+      const hash1 = getHashUrl();
+      const hash2 = getHashUrl();
+      const onChange = jest.fn();
+      const { container } = render(
+        <Anchor onChange={onChange} getCurrentAnchor={() => hash1}>
+          <Link href={`#${hash1}`} title={hash1} />
+          <Link href={`#${hash2}`} title={hash2} />
+        </Anchor>,
+        // https://github.com/testing-library/react-testing-library/releases/tag/v13.0.0
+        // @ts-ignore
+        { legacyRoot: true },
+      );
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      fireEvent.click(container.querySelector(`a[href="#${hash2}"]`)!);
+      expect(onChange).toHaveBeenCalledTimes(2);
+      expect(onChange).toHaveBeenLastCalledWith(`#${hash2}`);
+    });
+
+    // https://github.com/ant-design/ant-design/issues/34784
+    it('getCurrentAnchor have default link as argument', () => {
+      const hash1 = getHashUrl();
+      const hash2 = getHashUrl();
+      const getCurrentAnchor = jest.fn();
+      const { container } = render(
+        <Anchor getCurrentAnchor={getCurrentAnchor}>
+          <Link href={`#${hash1}`} title={hash1} />
+          <Link href={`#${hash2}`} title={hash2} />
+        </Anchor>,
+      );
+
+      fireEvent.click(container.querySelector(`a[href="#${hash1}"]`)!);
+      expect(getCurrentAnchor).toHaveBeenCalledWith(`#${hash1}`);
+      fireEvent.click(container.querySelector(`a[href="#${hash2}"]`)!);
+      expect(getCurrentAnchor).toHaveBeenCalledWith(`#${hash2}`);
+    });
+
+    // https://github.com/ant-design/ant-design/issues/37627
+    it('should update active link when getCurrentAnchor changes', async () => {
+      const hash1 = getHashUrl();
+      const hash2 = getHashUrl();
+      const Demo: React.FC<{ current: string }> = ({ current }) => (
+        <Anchor getCurrentAnchor={() => `#${current}`}>
+          <Link href={`#${hash1}`} title={hash1} />
+          <Link href={`#${hash2}`} title={hash2} />
+        </Anchor>
+      );
+      const { container, rerender } = render(<Demo current={hash1} />);
+      expect(container.querySelector(`.ant-anchor-link-title-active`)?.textContent).toBe(hash1);
+      rerender(<Demo current={hash2} />);
+      expect(container.querySelector(`.ant-anchor-link-title-active`)?.textContent).toBe(hash2);
+    });
+
+    it('should render correctly when href is null', () => {
+      expect(() => {
+        render(
+          <Anchor>
+            <Link href={null as unknown as string} title="test" />
+          </Anchor>,
+        );
+        fireEvent.scroll(window || document);
+      }).not.toThrow();
+    });
   });
 });

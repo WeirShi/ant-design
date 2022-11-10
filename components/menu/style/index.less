@@ -6,7 +6,7 @@
 @menu-animation-duration-normal: 0.15s;
 
 .accessibility-focus() {
-  box-shadow: 0 0 0 2px @primary-1;
+  box-shadow: 0 0 0 2px @primary-2;
 }
 
 // TODO: Should remove icon style compatible in v5
@@ -244,7 +244,7 @@
       }
     }
 
-    &:focus-visible {
+    &:not(.@{menu-prefix-cls}-item-disabled):focus-visible {
       .accessibility-focus();
     }
   }
@@ -665,8 +665,8 @@
 
     a {
       color: @disabled-color !important;
-      pointer-events: none;
     }
+
     > .@{menu-prefix-cls}-submenu-title {
       color: @disabled-color !important;
       cursor: not-allowed;

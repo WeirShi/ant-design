@@ -1,19 +1,19 @@
-import * as React from 'react';
-import useMergedState from 'rc-util/lib/hooks/useMergedState';
 import classNames from 'classnames';
 import padStart from 'lodash/padStart';
 import { PickerPanel as RCPickerPanel } from 'rc-picker';
-import { Locale } from 'rc-picker/lib/interface';
-import { GenerateConfig } from 'rc-picker/lib/generate';
-import {
+import type { GenerateConfig } from 'rc-picker/lib/generate';
+import type { Locale } from 'rc-picker/lib/interface';
+import type {
   PickerPanelBaseProps as RCPickerPanelBaseProps,
   PickerPanelDateProps as RCPickerPanelDateProps,
   PickerPanelTimeProps as RCPickerPanelTimeProps,
 } from 'rc-picker/lib/PickerPanel';
-import LocaleReceiver from '../locale-provider/LocaleReceiver';
-import enUS from './locale/en_US';
+import useMergedState from 'rc-util/lib/hooks/useMergedState';
+import * as React from 'react';
 import { ConfigContext } from '../config-provider';
+import LocaleReceiver from '../locale-provider/LocaleReceiver';
 import CalendarHeader from './Header';
+import enUS from './locale/en_US';
 
 type InjectDefaultProps<Props> = Omit<
   Props,
@@ -174,7 +174,7 @@ function generateCalendar<DateType>(generateConfig: GenerateConfig<DateType>) {
       };
       result.lang = {
         ...result.lang,
-        ...((locale || {}) as any).lang,
+        ...(locale || {}).lang,
       };
       return result;
     };
@@ -232,7 +232,7 @@ function generateCalendar<DateType>(generateConfig: GenerateConfig<DateType>) {
 
     return (
       <LocaleReceiver componentName="Calendar" defaultLocale={getDefaultLocale}>
-        {(mergedLocale: any) => (
+        {contextLocale => (
           <div
             className={classNames(
               calendarPrefixCls,
@@ -259,7 +259,7 @@ function generateCalendar<DateType>(generateConfig: GenerateConfig<DateType>) {
                 generateConfig={generateConfig}
                 mode={mergedMode}
                 fullscreen={fullscreen}
-                locale={mergedLocale.lang}
+                locale={contextLocale.lang}
                 validRange={validRange}
                 onChange={onInternalSelect}
                 onModeChange={triggerModeChange}
@@ -269,13 +269,13 @@ function generateCalendar<DateType>(generateConfig: GenerateConfig<DateType>) {
             <RCPickerPanel
               value={mergedValue}
               prefixCls={prefixCls}
-              locale={mergedLocale.lang}
+              locale={contextLocale.lang}
               generateConfig={generateConfig}
               dateRender={dateRender}
-              monthCellRender={date => monthRender(date, mergedLocale.lang)}
+              monthCellRender={date => monthRender(date, contextLocale.lang)}
               onSelect={onInternalSelect}
               mode={panelMode}
-              picker={panelMode as any}
+              picker={panelMode}
               disabledDate={mergedDisabledDate}
               hideHeader
             />

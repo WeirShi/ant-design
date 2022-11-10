@@ -1,27 +1,28 @@
-import * as React from 'react';
-import omit from 'rc-util/lib/omit';
-import classNames from 'classnames';
 import DownOutlined from '@ant-design/icons/DownOutlined';
+import classNames from 'classnames';
+import omit from 'rc-util/lib/omit';
+import * as React from 'react';
 import Checkbox from '../checkbox';
-import Menu from '../menu';
 import Dropdown from '../dropdown';
-import {
-  TransferDirection,
+import type { MenuProps } from '../menu';
+import { isValidElement } from '../_util/reactNode';
+import type {
+  KeyWiseTransferItem,
   RenderResult,
   RenderResultObject,
   SelectAllLabel,
+  TransferDirection,
   TransferLocale,
-  KeyWiseTransferItem,
 } from './index';
+import type { PaginationType } from './interface';
+import type { TransferListBodyProps } from './ListBody';
+import DefaultListBody, { OmitProps } from './ListBody';
 import Search from './search';
-import DefaultListBody, { TransferListBodyProps, OmitProps } from './ListBody';
-import { PaginationType } from './interface';
-import { isValidElement } from '../_util/reactNode';
 
 const defaultRender = () => null;
 
-function isRenderResultPlainObject(result: RenderResult) {
-  return (
+function isRenderResultPlainObject(result: RenderResult): result is RenderResultObject {
+  return !!(
     result &&
     !isValidElement(result) &&
     Object.prototype.toString.call(result) === '[object Object]'
@@ -80,12 +81,6 @@ interface TransferListState {
 export default class TransferList<
   RecordType extends KeyWiseTransferItem,
 > extends React.PureComponent<TransferListProps<RecordType>, TransferListState> {
-  static defaultProps = {
-    dataSource: [],
-    titleText: '',
-    showSearch: false,
-  };
-
   timer: number;
 
   triggerScrollTimer: number;
@@ -108,7 +103,7 @@ export default class TransferList<
     if (checkedKeys.length === 0) {
       return 'none';
     }
-    if (filteredItems.every(item => checkedKeys.indexOf(item.key) >= 0 || !!item.disabled)) {
+    if (filteredItems.every(item => checkedKeys.includes(item.key) || !!item.disabled)) {
       return 'all';
     }
     return 'part';
@@ -160,7 +155,7 @@ export default class TransferList<
     if (filterOption) {
       return filterOption(filterValue, item);
     }
-    return text.indexOf(filterValue) >= 0;
+    return text.includes(filterValue);
   };
 
   // =============================== Render ===============================
@@ -274,7 +269,7 @@ export default class TransferList<
 
   renderItem = (item: RecordType): RenderedItem<RecordType> => {
     const { render = defaultRender } = this.props;
-    const renderResult: RenderResult = render(item);
+    const renderResult = render(item);
     const isRenderResultPlain = isRenderResultPlainObject(renderResult);
     return {
       renderedText: isRenderResultPlain
@@ -304,12 +299,12 @@ export default class TransferList<
     const { filterValue } = this.state;
     const {
       prefixCls,
-      dataSource,
-      titleText,
+      dataSource = [],
+      titleText = '',
       checkedKeys,
       disabled,
       footer,
-      showSearch,
+      showSearch = false,
       style,
       searchPlaceholder,
       notFoundContent,
@@ -363,94 +358,87 @@ export default class TransferList<
       !pagination &&
       this.getCheckBox({ filteredItems, onItemSelectAll, disabled, prefixCls });
 
-    let menu: React.ReactElement | null = null;
+    let items: MenuProps['items'];
     if (showRemove) {
-      menu = (
-        <Menu>
-          {/* Remove Current Page */}
-          {pagination && (
-            <Menu.Item
-              key="removeCurrent"
-              onClick={() => {
+      items = [
+        /* Remove Current Page */
+        pagination
+          ? {
+              key: 'removeCurrent',
+              onClick: () => {
                 const pageKeys = getEnabledItemKeys(
                   (this.defaultListBodyRef.current?.getItems() || []).map(entity => entity.item),
                 );
                 onItemRemove?.(pageKeys);
-              }}
-            >
-              {removeCurrent}
-            </Menu.Item>
-          )}
+              },
+              label: removeCurrent,
+            }
+          : null,
 
-          {/* Remove All */}
-          <Menu.Item
-            key="removeAll"
-            onClick={() => {
-              onItemRemove?.(getEnabledItemKeys(filteredItems));
-            }}
-          >
-            {removeAll}
-          </Menu.Item>
-        </Menu>
-      );
+        /* Remove All */
+        {
+          key: 'removeAll',
+          onClick: () => {
+            onItemRemove?.(getEnabledItemKeys(filteredItems));
+          },
+          label: removeAll,
+        },
+      ].filter(item => item);
     } else {
-      menu = (
-        <Menu>
-          <Menu.Item
-            key="selectAll"
-            onClick={() => {
-              const keys = getEnabledItemKeys(filteredItems);
-              onItemSelectAll(keys, keys.length !== checkedKeys.length);
-            }}
-          >
-            {selectAll}
-          </Menu.Item>
-          {pagination && (
-            <Menu.Item
-              onClick={() => {
+      items = [
+        {
+          key: 'selectAll',
+          onClick: () => {
+            const keys = getEnabledItemKeys(filteredItems);
+            onItemSelectAll(keys, keys.length !== checkedKeys.length);
+          },
+          label: selectAll,
+        },
+        pagination
+          ? {
+              key: 'selectCurrent',
+              onClick: () => {
                 const pageItems = this.defaultListBodyRef.current?.getItems() || [];
                 onItemSelectAll(getEnabledItemKeys(pageItems.map(entity => entity.item)), true);
-              }}
-            >
-              {selectCurrent}
-            </Menu.Item>
-          )}
-          <Menu.Item
-            key="selectInvert"
-            onClick={() => {
-              let availableKeys: string[];
-              if (pagination) {
-                availableKeys = getEnabledItemKeys(
-                  (this.defaultListBodyRef.current?.getItems() || []).map(entity => entity.item),
-                );
+              },
+              label: selectCurrent,
+            }
+          : null,
+
+        {
+          key: 'selectInvert',
+          onClick: () => {
+            let availableKeys: string[];
+            if (pagination) {
+              availableKeys = getEnabledItemKeys(
+                (this.defaultListBodyRef.current?.getItems() || []).map(entity => entity.item),
+              );
+            } else {
+              availableKeys = getEnabledItemKeys(filteredItems);
+            }
+
+            const checkedKeySet = new Set(checkedKeys);
+            const newCheckedKeys: string[] = [];
+            const newUnCheckedKeys: string[] = [];
+
+            availableKeys.forEach(key => {
+              if (checkedKeySet.has(key)) {
+                newUnCheckedKeys.push(key);
               } else {
-                availableKeys = getEnabledItemKeys(filteredItems);
+                newCheckedKeys.push(key);
               }
+            });
 
-              const checkedKeySet = new Set(checkedKeys);
-              const newCheckedKeys: string[] = [];
-              const newUnCheckedKeys: string[] = [];
-
-              availableKeys.forEach(key => {
-                if (checkedKeySet.has(key)) {
-                  newUnCheckedKeys.push(key);
-                } else {
-                  newCheckedKeys.push(key);
-                }
-              });
-
-              onItemSelectAll(newCheckedKeys, true);
-              onItemSelectAll(newUnCheckedKeys, false);
-            }}
-          >
-            {selectInvert}
-          </Menu.Item>
-        </Menu>
-      );
+            onItemSelectAll(newCheckedKeys, true);
+            onItemSelectAll(newUnCheckedKeys, false);
+          },
+          label: selectInvert,
+        },
+      ];
     }
 
     const dropdown = (
-      <Dropdown className={`${prefixCls}-header-dropdown`} overlay={menu} disabled={disabled}>
+      <Dropdown className={`${prefixCls}-header-dropdown`} menu={{ items }} disabled={disabled}>
         <DownOutlined />
       </Dropdown>
     );

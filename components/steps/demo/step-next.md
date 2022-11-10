@@ -13,10 +13,9 @@ title:
 
 Cooperate with the content and buttons, to represent the progress of a process.
 
-```jsx
-import { Steps, Button, message } from 'antd';
-
-const { Step } = Steps;
+```tsx
+import { Button, message, Steps } from 'antd';
+import React, { useState } from 'react';
 
 const steps = [
   {
@@ -33,8 +32,8 @@ const steps = [
   },
 ];
 
-const App = () => {
-  const [current, setCurrent] = React.useState(0);
+const App: React.FC = () => {
+  const [current, setCurrent] = useState(0);
 
   const next = () => {
     setCurrent(current + 1);
@@ -43,14 +42,11 @@ const App = () => {
   const prev = () => {
     setCurrent(current - 1);
   };
+  const items = steps.map(item => ({ key: item.title, title: item.title }));
 
   return (
     <>
-      <Steps current={current}>
-        {steps.map(item => (
-          <Step key={item.title} title={item.title} />
-        ))}
-      </Steps>
+      <Steps current={current} items={items} />
       <div className="steps-content">{steps[current].content}</div>
       <div className="steps-action">
         {current < steps.length - 1 && (
@@ -73,7 +69,7 @@ const App = () => {
   );
 };
 
-ReactDOM.render(<App />, mountNode);
+export default App;
 ```
 
 ```css

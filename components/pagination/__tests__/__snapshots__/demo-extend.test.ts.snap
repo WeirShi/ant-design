@@ -3,7 +3,6 @@
 exports[`renders ./components/pagination/demo/all.md extend context correctly 1`] = `
 <ul
   class="ant-pagination"
-  unselectable="unselectable"
 >
   <li
     class="ant-pagination-total-text"
@@ -219,7 +218,7 @@ exports[`renders ./components/pagination/demo/all.md extend context correctly 1`
       <div>
         <div
           class="ant-select-dropdown"
-          style="opacity:0;pointer-events:none"
+          style="opacity:0"
         >
           <div>
             <div
@@ -377,7 +376,6 @@ exports[`renders ./components/pagination/demo/all.md extend context correctly 1`
 exports[`renders ./components/pagination/demo/basic.md extend context correctly 1`] = `
 <ul
   class="ant-pagination"
-  unselectable="unselectable"
 >
   <li
     aria-disabled="true"
@@ -505,7 +503,6 @@ exports[`renders ./components/pagination/demo/changer.md extend context correctl
 Array [
   <ul
     class="ant-pagination"
-    unselectable="unselectable"
   >
     <li
       aria-disabled="false"
@@ -716,7 +713,7 @@ Array [
         <div>
           <div
             class="ant-select-dropdown"
-            style="opacity:0;pointer-events:none"
+            style="opacity:0"
           >
             <div>
               <div
@@ -861,7 +858,6 @@ Array [
   <br />,
   <ul
     class="ant-pagination ant-pagination-disabled"
-    unselectable="unselectable"
   >
     <li
       aria-disabled="false"
@@ -1073,7 +1069,7 @@ Array [
         <div>
           <div
             class="ant-select-dropdown"
-            style="opacity:0;pointer-events:none"
+            style="opacity:0"
           >
             <div>
               <div
@@ -1221,7 +1217,6 @@ Array [
 exports[`renders ./components/pagination/demo/controlled.md extend context correctly 1`] = `
 <ul
   class="ant-pagination"
-  unselectable="unselectable"
 >
   <li
     aria-disabled="false"
@@ -1348,7 +1343,6 @@ exports[`renders ./components/pagination/demo/controlled.md extend context corre
 exports[`renders ./components/pagination/demo/itemRender.md extend context correctly 1`] = `
 <ul
   class="ant-pagination"
-  unselectable="unselectable"
 >
   <li
     aria-disabled="true"
@@ -1516,7 +1510,7 @@ exports[`renders ./components/pagination/demo/itemRender.md extend context corre
       <div>
         <div
           class="ant-select-dropdown"
-          style="opacity:0;pointer-events:none"
+          style="opacity:0"
         >
           <div>
             <div
@@ -1664,7 +1658,6 @@ exports[`renders ./components/pagination/demo/jump.md extend context correctly 1
 Array [
   <ul
     class="ant-pagination"
-    unselectable="unselectable"
   >
     <li
       aria-disabled="false"
@@ -1875,7 +1868,7 @@ Array [
         <div>
           <div
             class="ant-select-dropdown"
-            style="opacity:0;pointer-events:none"
+            style="opacity:0"
           >
             <div>
               <div
@@ -2031,7 +2024,6 @@ Array [
   <br />,
   <ul
     class="ant-pagination ant-pagination-disabled"
-    unselectable="unselectable"
   >
     <li
       aria-disabled="false"
@@ -2243,7 +2235,7 @@ Array [
         <div>
           <div
             class="ant-select-dropdown"
-            style="opacity:0;pointer-events:none"
+            style="opacity:0"
           >
             <div>
               <div
@@ -2403,8 +2395,7 @@ Array [
 exports[`renders ./components/pagination/demo/mini.md extend context correctly 1`] = `
 Array [
   <ul
-    class="ant-pagination mini"
-    unselectable="unselectable"
+    class="ant-pagination ant-pagination-mini"
   >
     <li
       aria-disabled="true"
@@ -2527,8 +2518,7 @@ Array [
     </li>
   </ul>,
   <ul
-    class="ant-pagination mini"
-    unselectable="unselectable"
+    class="ant-pagination ant-pagination-mini"
   >
     <li
       aria-disabled="true"
@@ -2690,7 +2680,7 @@ Array [
         <div>
           <div
             class="ant-select-dropdown"
-            style="opacity:0;pointer-events:none"
+            style="opacity:0"
           >
             <div>
               <div
@@ -2844,8 +2834,7 @@ Array [
     </li>
   </ul>,
   <ul
-    class="ant-pagination mini"
-    unselectable="unselectable"
+    class="ant-pagination ant-pagination-mini"
   >
     <li
       class="ant-pagination-total-text"
@@ -2973,8 +2962,7 @@ Array [
     </li>
   </ul>,
   <ul
-    class="ant-pagination mini ant-pagination-disabled"
-    unselectable="unselectable"
+    class="ant-pagination ant-pagination-mini ant-pagination-disabled"
   >
     <li
       class="ant-pagination-total-text"
@@ -3142,7 +3130,7 @@ Array [
         <div>
           <div
             class="ant-select-dropdown"
-            style="opacity:0;pointer-events:none"
+            style="opacity:0"
           >
             <div>
               <div
@@ -3302,7 +3290,6 @@ Array [
 exports[`renders ./components/pagination/demo/more.md extend context correctly 1`] = `
 <ul
   class="ant-pagination"
-  unselectable="unselectable"
 >
   <li
     aria-disabled="false"
@@ -3562,7 +3549,7 @@ exports[`renders ./components/pagination/demo/more.md extend context correctly 1
       <div>
         <div
           class="ant-select-dropdown"
-          style="opacity:0;pointer-events:none"
+          style="opacity:0"
         >
           <div>
             <div
@@ -3885,7 +3872,6 @@ exports[`renders ./components/pagination/demo/total.md extend context correctly 
 Array [
   <ul
     class="ant-pagination"
-    unselectable="unselectable"
   >
     <li
       class="ant-pagination-total-text"
@@ -4052,7 +4038,7 @@ Array [
         <div>
           <div
             class="ant-select-dropdown"
-            style="opacity:0;pointer-events:none"
+            style="opacity:0"
           >
             <div>
               <div
@@ -4197,7 +4183,6 @@ Array [
   <br />,
   <ul
     class="ant-pagination"
-    unselectable="unselectable"
   >
     <li
       class="ant-pagination-total-text"
@@ -4364,7 +4349,7 @@ Array [
         <div>
           <div
             class="ant-select-dropdown"
-            style="opacity:0;pointer-events:none"
+            style="opacity:0"
           >
             <div>
               <div

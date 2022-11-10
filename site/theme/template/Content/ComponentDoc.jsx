@@ -41,11 +41,12 @@ class ComponentDoc extends React.Component {
   shouldComponentUpdate(nextProps, nextState) {
     const { location, theme } = this.props;
     const { location: nextLocation, theme: nextTheme } = nextProps;
-    const { expandAll, visibleAll, showRiddleButton } = this.state;
+    const { expandAll, visibleAll, showRiddleButton, react17Demo } = this.state;
     const {
       expandAll: nextExpandAll,
       visibleAll: nextVisibleAll,
       showRiddleButton: nextShowRiddleButton,
+      react17Demo: nextReact17Demo,
     } = nextState;
 
     if (
@@ -54,7 +55,8 @@ class ComponentDoc extends React.Component {
       showRiddleButton === nextShowRiddleButton &&
       theme === nextTheme &&
       visibleAll === nextVisibleAll &&
-      showRiddleButton === nextShowRiddleButton
+      showRiddleButton === nextShowRiddleButton &&
+      react17Demo === nextReact17Demo
     ) {
       return false;
     }
@@ -76,6 +78,13 @@ class ComponentDoc extends React.Component {
     const { visibleAll } = this.state;
     this.setState({
       visibleAll: !visibleAll,
+    });
+  };
+
+  handleDemoVersionToggle = () => {
+    const { react17Demo } = this.state;
+    this.setState({
+      react17Demo: !react17Demo,
     });
   };
 

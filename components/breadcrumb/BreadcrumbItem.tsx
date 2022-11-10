@@ -1,47 +1,67 @@
-import * as React from 'react';
 import DownOutlined from '@ant-design/icons/DownOutlined';
+import * as React from 'react';
 
-import DropDown, { DropDownProps } from '../dropdown/dropdown';
+import warning from '../_util/warning';
 import { ConfigContext } from '../config-provider';
+import type { DropdownProps } from '../dropdown/dropdown';
+import Dropdown from '../dropdown/dropdown';
 
 export interface BreadcrumbItemProps {
   prefixCls?: string;
   separator?: React.ReactNode;
   href?: string;
-  overlay?: DropDownProps['overlay'];
-  dropdownProps?: DropDownProps;
+  menu?: DropdownProps['menu'];
+  dropdownProps?: DropdownProps;
   onClick?: React.MouseEventHandler<HTMLAnchorElement | HTMLSpanElement>;
   className?: string;
+  children?: React.ReactNode;
+
+  // Deprecated
+  /** @deprecated Please use `menu` instead */
+  overlay?: DropdownProps['overlay'];
 }
 interface BreadcrumbItemInterface extends React.FC<BreadcrumbItemProps> {
   __ANT_BREADCRUMB_ITEM: boolean;
 }
-const BreadcrumbItem: BreadcrumbItemInterface = ({
-  prefixCls: customizePrefixCls,
-  separator = '/',
-  children,
-  overlay,
-  dropdownProps,
-  ...restProps
-}) => {
+const BreadcrumbItem: BreadcrumbItemInterface = props => {
+  const {
+    prefixCls: customizePrefixCls,
+    separator = '/',
+    children,
+    menu,
+    overlay,
+    dropdownProps,
+    ...restProps
+  } = props;
+
   const { getPrefixCls } = React.useContext(ConfigContext);
   const prefixCls = getPrefixCls('breadcrumb', customizePrefixCls);
-  /** If overlay is have Wrap a DropDown */
+
+  // Warning for deprecated usage
+  if (process.env.NODE_ENV !== 'production') {
+    warning(
+      !('overlay' in props),
+      'Breadcrumb.Item',
+      '`overlay` is deprecated. Please use `menu` instead.',
+    );
+  }
+
+  /** If overlay is have Wrap a Dropdown */
   const renderBreadcrumbNode = (breadcrumbItem: React.ReactNode) => {
-    if (overlay) {
+    if (menu || overlay) {
       return (
-        <DropDown overlay={overlay} placement="bottomCenter" {...dropdownProps}>
+        <Dropdown menu={menu} overlay={overlay} placement="bottom" {...dropdownProps}>
           <span className={`${prefixCls}-overlay-link`}>
             {breadcrumbItem}
             <DownOutlined />
           </span>
-        </DropDown>
+        </Dropdown>
       );
     }
     return breadcrumbItem;
   };
 
-  let link;
+  let link: React.ReactNode;
   if ('href' in restProps) {
     link = (
       <a className={`${prefixCls}-link`} {...restProps}>
@@ -58,14 +78,12 @@ const BreadcrumbItem: BreadcrumbItemInterface = ({
 
   // wrap to dropDown
   link = renderBreadcrumbNode(link);
-  if (children) {
+  if (children !== undefined && children !== null) {
     return (
-      <span>
+      <li>
         {link}
-        {separator && (
-          <span className={`${prefixCls}-separator`}>{separator}</span>
-        )}
-      </span>
+        {separator && <span className={`${prefixCls}-separator`}>{separator}</span>}
+      </li>
     );
   }
   return null;

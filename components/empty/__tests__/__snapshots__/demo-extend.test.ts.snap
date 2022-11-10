@@ -70,7 +70,7 @@ exports[`renders ./components/empty/demo/basic.md extend context correctly 1`] =
   <div
     class="ant-empty-description"
   >
-    No Data
+    No data
   </div>
 </div>
 `;
@@ -135,7 +135,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
       <div>
         <div
           class="ant-select-dropdown ant-select-dropdown-empty"
-          style="opacity:0;pointer-events:none"
+          style="opacity:0"
         >
           <div>
             <div
@@ -186,7 +186,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div
                   class="ant-empty-description"
                 >
-                  No Data
+                  No data
                 </div>
               </div>
             </div>
@@ -255,7 +255,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
       <div>
         <div
           class="ant-select-dropdown ant-tree-select-dropdown ant-select-dropdown-empty"
-          style="opacity:0;pointer-events:none"
+          style="opacity:0"
         >
           <div>
             <div
@@ -305,7 +305,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div
                   class="ant-empty-description"
                 >
-                  No Data
+                  No data
                 </div>
               </div>
             </div>
@@ -371,7 +371,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
       <div>
         <div
           class="ant-select-dropdown ant-cascader-dropdown ant-select-dropdown-empty"
-          style="opacity:0;pointer-events:none"
+          style="opacity:0"
         >
           <div>
             <div
@@ -433,7 +433,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                       <div
                         class="ant-empty-description"
                       >
-                        No Data
+                        No data
                       </div>
                     </div>
                   </div>
@@ -519,7 +519,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
           <div>
             <div
               class="ant-dropdown"
-              style="opacity:0;pointer-events:none"
+              style="opacity:0"
             >
               <ul
                 class="ant-dropdown-menu ant-dropdown-menu-root ant-dropdown-menu-vertical ant-dropdown-menu-light"
@@ -541,7 +541,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div>
                   <div
                     class="ant-tooltip ant-dropdown-menu-inline-collapsed-tooltip"
-                    style="opacity:0;pointer-events:none"
+                    style="opacity:0"
                   >
                     <div
                       class="ant-tooltip-content"
@@ -574,7 +574,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div>
                   <div
                     class="ant-tooltip ant-dropdown-menu-inline-collapsed-tooltip"
-                    style="opacity:0;pointer-events:none"
+                    style="opacity:0"
                   >
                     <div
                       class="ant-tooltip-content"
@@ -601,7 +601,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div>
                   <div
                     class="ant-tooltip ant-dropdown-menu-inline-collapsed-tooltip"
-                    style="opacity:0;pointer-events:none"
+                    style="opacity:0"
                   >
                     <div
                       class="ant-tooltip-content"
@@ -623,7 +623,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div>
                   <div
                     class="ant-tooltip ant-dropdown-menu-inline-collapsed-tooltip"
-                    style="opacity:0;pointer-events:none"
+                    style="opacity:0"
                   >
                     <div
                       class="ant-tooltip-content"
@@ -648,7 +648,10 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
           <span
             class="ant-transfer-list-header-selected"
           >
-            0 item
+            0
+            <!-- -->
+            <!-- -->
+            item
           </span>
           <span
             class="ant-transfer-list-header-title"
@@ -703,7 +706,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
               <div
                 class="ant-empty-description"
               >
-                No Data
+                No data
               </div>
             </div>
           </div>
@@ -806,7 +809,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
           <div>
             <div
               class="ant-dropdown"
-              style="opacity:0;pointer-events:none"
+              style="opacity:0"
             >
               <ul
                 class="ant-dropdown-menu ant-dropdown-menu-root ant-dropdown-menu-vertical ant-dropdown-menu-light"
@@ -828,7 +831,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div>
                   <div
                     class="ant-tooltip ant-dropdown-menu-inline-collapsed-tooltip"
-                    style="opacity:0;pointer-events:none"
+                    style="opacity:0"
                   >
                     <div
                       class="ant-tooltip-content"
@@ -861,7 +864,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div>
                   <div
                     class="ant-tooltip ant-dropdown-menu-inline-collapsed-tooltip"
-                    style="opacity:0;pointer-events:none"
+                    style="opacity:0"
                   >
                     <div
                       class="ant-tooltip-content"
@@ -888,7 +891,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div>
                   <div
                     class="ant-tooltip ant-dropdown-menu-inline-collapsed-tooltip"
-                    style="opacity:0;pointer-events:none"
+                    style="opacity:0"
                   >
                     <div
                       class="ant-tooltip-content"
@@ -910,7 +913,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                 <div>
                   <div
                     class="ant-tooltip ant-dropdown-menu-inline-collapsed-tooltip"
-                    style="opacity:0;pointer-events:none"
+                    style="opacity:0"
                   >
                     <div
                       class="ant-tooltip-content"
@@ -935,7 +938,10 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
           <span
             class="ant-transfer-list-header-selected"
           >
-            0 item
+            0
+            <!-- -->
+            <!-- -->
+            item
           </span>
           <span
             class="ant-transfer-list-header-title"
@@ -990,7 +996,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
               <div
                 class="ant-empty-description"
               >
-                No Data
+                No data
               </div>
             </div>
           </div>
@@ -1092,7 +1098,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
                           <div
                             class="ant-empty-description"
                           >
-                            No Data
+                            No data
                           </div>
                         </div>
                       </td>
@@ -1163,7 +1169,7 @@ exports[`renders ./components/empty/demo/config-provider.md extend context corre
               <div
                 class="ant-empty-description"
               >
-                No Data
+                No data
               </div>
             </div>
           </div>
@@ -1191,7 +1197,7 @@ exports[`renders ./components/empty/demo/customize.md extend context correctly 1
     class="ant-empty-description"
   >
     <span>
-      Customize 
+      Customize
       <a
         href="#API"
       >
@@ -1328,7 +1334,7 @@ exports[`renders ./components/empty/demo/simple.md extend context correctly 1`] 
   <div
     class="ant-empty-description"
   >
-    No Data
+    No data
   </div>
 </div>
 `;

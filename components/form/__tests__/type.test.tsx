@@ -1,5 +1,6 @@
 import * as React from 'react';
-import Form, { FormInstance } from '..';
+import type { FormInstance } from '..';
+import Form from '..';
 import Input from '../../input';
 
 interface FormValues {
@@ -16,13 +17,12 @@ describe('Form.typescript', () => {
         </Form.Item>
       </Form>
     );
-
     expect(form).toBeTruthy();
   });
 
   describe('generic', () => {
     it('hooks', () => {
-      const Demo = () => {
+      const Demo: React.FC = () => {
         const [form] = Form.useForm<FormValues>();
 
         form.setFieldsValue({ path1: { path2: 2333 } });
@@ -69,7 +69,7 @@ describe('Form.typescript', () => {
   });
 
   it('FormItem renderProps support generic', () => {
-    const Demo = () => (
+    const Demo: React.FC = () => (
       <Form<FormValues>>
         <Form.Item<FormValues>>
           {({ getFieldsValue }) => {
@@ -82,6 +82,18 @@ describe('Form.typescript', () => {
         </Form.Item>
       </Form>
     );
+
+    expect(Demo).toBeTruthy();
+  });
+
+  // TODO: @crazyair fix for value types
+  it('useWatch', () => {
+    const Demo: React.FC = () => {
+      const [form] = Form.useForm<FormValues>();
+      const value = Form.useWatch('username', form);
+
+      return <Form form={form}>{value}</Form>;
+    };
 
     expect(Demo).toBeTruthy();
   });

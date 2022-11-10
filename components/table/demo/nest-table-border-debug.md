@@ -14,19 +14,36 @@ debug: true
 
 To see if bordered style applied to other tables.
 
-```jsx
-import { Table, Badge, Menu, Dropdown, Switch, Form, Space } from 'antd';
+```tsx
 import { DownOutlined } from '@ant-design/icons';
+import type { TableColumnsType } from 'antd';
+import { Badge, Dropdown, Form, Space, Switch, Table } from 'antd';
+import React, { useState } from 'react';
 
-const menu = (
-  <Menu>
-    <Menu.Item>Action 1</Menu.Item>
-    <Menu.Item>Action 2</Menu.Item>
-  </Menu>
-);
+interface DataType {
+  key: React.Key;
+  name: string;
+  platform: string;
+  version: string;
+  upgradeNum: number;
+  creator: string;
+  createdAt: string;
+}
 
-function NestedTable() {
-  const createExpandedRowRender = bordered => () => {
+interface ExpandedDataType {
+  key: React.Key;
+  date: string;
+  name: string;
+  upgradeNum: string;
+}
+
+const items = [
+  { key: '1', label: 'Action 1' },
+  { key: '2', label: 'Action 2' },
+];
+
+const App: React.FC = () => {
+  const createExpandedRowRender = (bordered: boolean) => () => {
     const columns = [
       { title: 'Date', dataIndex: 'date', key: 'date' },
       { title: 'Name', dataIndex: 'name', key: 'name' },
@@ -49,7 +66,7 @@ function NestedTable() {
           <Space size="middle">
             <a>Pause</a>
             <a>Stop</a>
-            <Dropdown overlay={menu}>
+            <Dropdown menu={{ items }}>
               <a>
                 More <DownOutlined />
               </a>
@@ -59,7 +76,7 @@ function NestedTable() {
       },
     ];
 
-    const data = [];
+    const data: ExpandedDataType[] = [];
     for (let i = 0; i < 3; ++i) {
       data.push({
         key: i,
@@ -68,10 +85,11 @@ function NestedTable() {
         upgradeNum: 'Upgraded: 56',
       });
     }
+
     return <Table columns={columns} dataSource={data} pagination={false} bordered={bordered} />;
   };
 
-  const columns = [
+  const columns: TableColumnsType<DataType> = [
     { title: 'Name', dataIndex: 'name', key: 'name' },
     { title: 'Platform', dataIndex: 'platform', key: 'platform' },
     { title: 'Version', dataIndex: 'version', key: 'version' },
@@ -81,7 +99,7 @@ function NestedTable() {
     { title: 'Action', key: 'operation', render: () => <a>Publish</a> },
   ];
 
-  const data = [];
+  const data: DataType[] = [];
   for (let i = 0; i < 3; ++i) {
     data.push({
       key: i,
@@ -94,8 +112,8 @@ function NestedTable() {
     });
   }
 
-  const [rootTableBordered, setRootTableBordered] = React.useState(true);
-  const [childTableBordered, setChildTableBordered] = React.useState(true);
+  const [rootTableBordered, setRootTableBordered] = useState(true);
+  const [childTableBordered, setChildTableBordered] = useState(true);
   return (
     <>
       <Form
@@ -113,7 +131,6 @@ function NestedTable() {
       <Table
         title={() => 'cool'}
         footer={() => 'cool'}
-        className="components-table-demo-nested"
         columns={columns}
         expandable={{ expandedRowRender: createExpandedRowRender(childTableBordered) }}
         dataSource={data}
@@ -121,7 +138,7 @@ function NestedTable() {
       />
     </>
   );
-}
+};
 
-ReactDOM.render(<NestedTable />, mountNode);
+export default App;
 ```

@@ -1,5 +1,5 @@
-import * as React from 'react';
 import padStart from 'lodash/padStart';
+import type * as React from 'react';
 
 export type valueType = number | string;
 export type countdownValueType = valueType | string;
@@ -41,7 +41,7 @@ export function formatTimeStr(duration: number, format: string) {
   const templateText = format.replace(escapeRegex, '[]');
 
   const replacedText = timeUnits.reduce((current, [name, unit]) => {
-    if (current.indexOf(name) !== -1) {
+    if (current.includes(name)) {
       const value = Math.floor(leftDuration / unit);
       leftDuration -= value * unit;
       return current.replace(new RegExp(`${name}+`, 'g'), (match: string) => {

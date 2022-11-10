@@ -14,13 +14,45 @@ title:
 Use `treeLine` to show the line style.
 
 ```tsx
-import { TreeSelect, Switch, Space } from 'antd';
+import { Space, Switch, TreeSelect } from 'antd';
+import React, { useState } from 'react';
 
-const { TreeNode } = TreeSelect;
+const treeData = [
+  {
+    value: 'parent 1',
+    title: 'parent 1',
+    children: [
+      {
+        value: 'parent 1-0',
+        title: 'parent 1-0',
+        children: [
+          {
+            value: 'leaf1',
+            title: 'leaf1',
+          },
+          {
+            value: 'leaf2',
+            title: 'leaf2',
+          },
+        ],
+      },
+      {
+        value: 'parent 1-1',
+        title: 'parent 1-1',
+        children: [
+          {
+            value: 'sss',
+            title: 'sss',
+          },
+        ],
+      },
+    ],
+  },
+];
 
-const Demo = () => {
-  const [treeLine, setTreeLine] = React.useState(true);
-  const [showLeafIcon, setShowLeafIcon] = React.useState(false);
+const App: React.FC = () => {
+  const [treeLine, setTreeLine] = useState(true);
+  const [showLeafIcon, setShowLeafIcon] = useState(false);
 
   return (
     <Space direction="vertical">
@@ -37,20 +69,14 @@ const Demo = () => {
         checked={showLeafIcon}
         onChange={() => setShowLeafIcon(!showLeafIcon)}
       />
-      <TreeSelect treeLine={treeLine && { showLeafIcon }} style={{ width: 300 }}>
-        <TreeNode value="parent 1" title="parent 1">
-          <TreeNode value="parent 1-0" title="parent 1-0">
-            <TreeNode value="leaf1" title="my leaf" />
-            <TreeNode value="leaf2" title="your leaf" />
-          </TreeNode>
-          <TreeNode value="parent 1-1" title="parent 1-1">
-            <TreeNode value="sss" title="sss" />
-          </TreeNode>
-        </TreeNode>
-      </TreeSelect>
+      <TreeSelect
+        treeLine={treeLine && { showLeafIcon }}
+        style={{ width: 300 }}
+        treeData={treeData}
+      />
     </Space>
   );
 };
 
-ReactDOM.render(<Demo />, mountNode);
+export default App;
 ```
